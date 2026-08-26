@@ -1,0 +1,30 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Terraform plan (바이너리에 sensitive 값이 평문으로 포함될 수 있음)
+*.tfplan
+tfplan
+tfplan*
+*destroyplan*
+
+# Sensitive variable files
+terraform.tfvars
+*.auto.tfvars
+secrets*.tfvars
+
+# CLI config
+terraform.rc
+.terraformrc
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# logs
+crash.log
+crash.*.log
