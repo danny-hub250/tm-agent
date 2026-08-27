@@ -25,7 +25,7 @@
 
 - **테스트용 VM 제외**: ceoagent-dev의 "Foundry 연동 테스트용 VM"(및 관련 public IP, NSG, linuxvm 모듈)은 제외했습니다. 필요 없는 리소스이기 때문입니다.
 - **Private Endpoint는 포함**: Foundry·AI Search·Container Registry 연결용으로 각 환경 전용 VNet/Subnet, Private DNS Zone(openai/cognitiveservices/services.ai/search/azurecr), Private Endpoint를 ceoagent-dev와 동일한 패턴으로 구성했습니다. (public network access는 기본값(Enabled)을 그대로 두었으며, 필요 시 `aisearch`/`containerregistry` 모듈의 `public_network_access_enabled`나 `foundry` 리소스에 `public_network_access_enabled = false`를 추가해 비활성화할 수 있습니다.)
-- **AI Search 추가**: `modules/aisearch` 모듈을 신규로 만들어 각 환경에 `azurerm_search_service`를 추가했습니다.
+- **AI Search 추가 (현재 비활성화)**: `modules/aisearch` 모듈을 신규로 만들어 각 환경에 `azurerm_search_service`를 추가했으나, AI Search는 AKS 내 OSS(예: OpenSearch 등)로 대체 설치할 예정이라 `environments/*/main.tf`의 `ai_search`/`search_pe`/`search_dns`/`search_dns_link` 모듈 블록은 현재 주석 처리되어 있습니다. 향후 Azure AI Search를 다시 사용할 경우를 대비해 코드는 남겨 두었습니다.
 - **Container Registry 추가**: `modules/containerregistry` 모듈을 신규로 만들어 각 환경에 `azurerm_container_registry`(Premium — Private Endpoint 사용 요건)를 추가했습니다.
 - **네트워크 리소스그룹 제외**: 별도 `network-rg` 없이 `ai-rg` 하나에 RG/VNet/PE 리소스를 모두 둡니다.
 
@@ -49,12 +49,14 @@
 | PE Subnet | `aide-pe-d-snet` | `aide-pe-p-snet` |
 | AI Foundry | `aide-d-msf` | `aide-p-msf` |
 | AI Foundry PE | `aide-d-msf-pe` | `aide-p-msf-pe` |
-| AI Search | `aide-d-srch01` | `aide-p-srch01` |
-| AI Search PE | `aide-d-srch01-pe` | `aide-p-srch01-pe` |
+| AI Search (비활성화) | `aide-d-srch01` | `aide-p-srch01` |
+| AI Search PE (비활성화) | `aide-d-srch01-pe` | `aide-p-srch01-pe` |
 | Container Registry | `aidedevcr` | `aideprdcr` |
 | Container Registry PE | `aidedevcr-pe` | `aideprdcr-pe` |
 
 Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `aidedevcr`/`aideprdcr`로 지었습니다.
+
+> **AI Search 비활성화 안내**: AI Search는 AKS 내 OSS로 대체 설치 예정이라 현재 `main.tf`에서 관련 모듈(`ai_search`, `search_pe`, `search_dns`, `search_dns_link`)이 주석 처리되어 실제로 배포되지 않습니다. 위 이름/SKU 표기는 향후 재사용 시 참고용입니다.
 
 ## SKU
 
