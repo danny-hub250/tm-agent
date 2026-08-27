@@ -26,3 +26,25 @@
 - [ ] `mySUNI AI Portal - LJK` 구독의 EastUS2 OpenAI GlobalStandard quota를 dev+prd 합산 필요량 기준으로 증설 요청
 - [ ] 증설 승인 후 두 환경 모두 `model_deployments`의 capacity를 주석에 남긴 원래 목표값으로 복원하고 `terraform apply` 재실행 (dev: gpt-5.5=5004/luna=3007/sol=3990/terra=3003/embedding=12003, prd: gpt-5.5=5997/luna=2997/sol=7993/terra=6001/embedding=1964)
 - [ ] AI Search를 실제로 사용하게 될 경우 주석 처리된 `ai_search`/`search_pe`/`search_dns`/`search_dns_link` 모듈 복원
+
+## 2026-08-27 — aide-dev / aide-prd 리소스 삭제
+
+위에서 배포했던 두 환경을 모두 `terraform destroy`로 삭제함.
+- **aide-dev**: 20/20 리소스 삭제 성공 (`aide-ai-dev-rg` 리소스그룹 자체도 삭제 완료).
+- **aide-prd**: state에 반영되어 있던 15/15 리소스 삭제 성공 (모델 배포 5개는 애초에 quota 실패로 생성되지 않아 대상에서 제외).
+- `az group exists`로 두 리소스그룹 모두 삭제 확인.
+
+## 2026-08-27 — 프로젝트 네이밍 `aide` → `taide` 전체 변경
+
+실제 Azure에 배포된 리소스가 없는 상태에서, 프로젝트 닉네임과 리소스 이름 프리픽스를 `aide`에서 `taide`로 전체 변경함 (폴더명, Azure 리소스 이름 문자열, `owner` 태그 값, `README.md`). 위 두 절(최초 배포/삭제)의 기록은 **당시 실제 사용된 이름(`aide-*`) 그대로 보존**하며, 이후 재배포 시에는 `taide-*` 이름으로 생성됨:
+
+| 리소스 | 변경 전 (aide) | 변경 후 (taide) |
+|---|---|---|
+| 환경 폴더 | `environments/aide-dev`, `environments/aide-prd` | `environments/taide-dev`, `environments/taide-prd` |
+| Resource Group | `aide-ai-dev-rg` / `aide-ai-prd-rg` | `taide-ai-dev-rg` / `taide-ai-prd-rg` |
+| VNet / Subnet | `aide-d-vnet` 등 | `taide-d-vnet` 등 |
+| AI Foundry | `aide-d-msf` / `aide-p-msf` | `taide-d-msf` / `taide-p-msf` |
+| Container Registry | `aidedevcr` / `aideprdcr` | `taidedevcr` / `taideprdcr` |
+| owner 태그 | `tm agent (aide)` | `tm agent (taide)` |
+
+`tm-agent-aide-iac.md`(세션 노트)는 과거 의사결정 히스토리 문서라 그대로 두었고, README.md가 현재 네이밍의 source of truth임.

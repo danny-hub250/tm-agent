@@ -1,6 +1,6 @@
-# TM Agent (aide) - Azure IaC
+# TM Agent (taide) - Azure IaC
 
-`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(aide) 프로젝트용 Terraform 코드입니다.
+`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(taide) 프로젝트용 Terraform 코드입니다.
 
 ## 구조
 
@@ -17,8 +17,8 @@
 │   ├── aisearch/             # Azure AI Search
 │   └── containerregistry/    # Azure Container Registry (Premium)
 └── environments/
-    ├── aide-dev/         # 개발 환경
-    └── aide-prd/         # 운영 환경
+    ├── taide-dev/         # 개발 환경
+    └── taide-prd/         # 운영 환경
 ```
 
 ## ceoagent-dev 대비 변경/제외 사항
@@ -35,26 +35,26 @@
 
 | key   | value                         |
 |-------|-------------------------------|
-| owner | `tm agent (aide)`             |
-| env   | `dev` (aide-dev) / `prd` (aide-prd) |
+| owner | `tm agent (taide)`             |
+| env   | `dev` (taide-dev) / `prd` (taide-prd) |
 
 ## 리소스 이름 규칙
 
-폴더/모듈 이름은 `aide-dev`, `aide-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
+폴더/모듈 이름은 `taide-dev`, `taide-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
 
-| 리소스 | aide-dev | aide-prd |
+| 리소스 | taide-dev | taide-prd |
 |---|---|---|
-| Resource Group | `aide-ai-dev-rg` | `aide-ai-prd-rg` |
-| VNet | `aide-d-vnet` | `aide-p-vnet` |
-| PE Subnet | `aide-pe-d-snet` | `aide-pe-p-snet` |
-| AI Foundry | `aide-d-msf` | `aide-p-msf` |
-| AI Foundry PE | `aide-d-msf-pe` | `aide-p-msf-pe` |
-| AI Search (비활성화) | `aide-d-srch01` | `aide-p-srch01` |
-| AI Search PE (비활성화) | `aide-d-srch01-pe` | `aide-p-srch01-pe` |
-| Container Registry | `aidedevcr` | `aideprdcr` |
-| Container Registry PE | `aidedevcr-pe` | `aideprdcr-pe` |
+| Resource Group | `taide-ai-dev-rg` | `taide-ai-prd-rg` |
+| VNet | `taide-d-vnet` | `taide-p-vnet` |
+| PE Subnet | `taide-pe-d-snet` | `taide-pe-p-snet` |
+| AI Foundry | `taide-d-msf` | `taide-p-msf` |
+| AI Foundry PE | `taide-d-msf-pe` | `taide-p-msf-pe` |
+| AI Search (비활성화) | `taide-d-srch01` | `taide-p-srch01` |
+| AI Search PE (비활성화) | `taide-d-srch01-pe` | `taide-p-srch01-pe` |
+| Container Registry | `taidedevcr` | `taideprdcr` |
+| Container Registry PE | `taidedevcr-pe` | `taideprdcr-pe` |
 
-Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `aidedevcr`/`aideprdcr`로 지었습니다.
+Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `taidedevcr`/`taideprdcr`로 지었습니다.
 
 > **AI Search 비활성화 안내**: AI Search는 AKS 내 OSS로 대체 설치 예정이라 현재 `main.tf`에서 관련 모듈(`ai_search`, `search_pe`, `search_dns`, `search_dns_link`)이 주석 처리되어 실제로 배포되지 않습니다. 위 이름/SKU 표기는 향후 재사용 시 참고용입니다.
 
@@ -67,13 +67,13 @@ Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)
 | Container Registry | `Premium` (Private Endpoint 사용 요건) |
 | AI Search | `basic` |
 
-VNet 주소 공간은 `aide-dev` = `10.160.0.0/24`, `aide-prd` = `10.161.0.0/24` (PE 서브넷은 각각 `.0/25`)로 두어 서로 겹치지 않게 했습니다.
+VNet 주소 공간은 `taide-dev` = `10.160.0.0/24`, `taide-prd` = `10.161.0.0/24` (PE 서브넷은 각각 `.0/25`)로 두어 서로 겹치지 않게 했습니다.
 
 ## 모델 배포
 
 `foundry` 모듈은 `model_deployments`(map, `for_each`)로 Foundry 계정 하나에 여러 OpenAI 모델을 배포할 수 있습니다. 두 환경 모두 아래 5개 모델을 배포하며, 버전 업그레이드 정책은 전 배포 공통으로 `version_upgrade_option = "OnceCurrentVersionExpired"`(현재 버전이 만료되는 경우)입니다.
 
-| 배포 이름 | 모델 버전 | aide-dev capacity | aide-prd capacity |
+| 배포 이름 | 모델 버전 | taide-dev capacity | taide-prd capacity |
 |---|---|---|---|
 | gpt-5.5 | 2026-04-24 | 5004 | 5997 |
 | gpt-5.6-luna | 2026-07-09 | 3007 | 2997 |
@@ -86,7 +86,7 @@ capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000
 ## 사용법
 
 ```bash
-cd environments/aide-dev   # 또는 aide-prd
+cd environments/taide-dev   # 또는 taide-prd
 terraform init
 terraform plan
 terraform apply
@@ -94,4 +94,4 @@ terraform apply
 
 - `terraform.tfvars.example`을 참고해 `terraform.tfvars`의 값을 환경에 맞게 조정하세요.
 - Foundry 리소스는 ceoagent-dev와 동일하게 모델 가용 리전인 `EastUS2`에 고정 배포되며, 그 외 리소스(RG, AI Search)는 `var.location`(기본 `koreacentral`)을 따릅니다.
-- 리소스 이름(`aide-d-msf`, `aide-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.
+- 리소스 이름(`taide-d-msf`, `taide-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.

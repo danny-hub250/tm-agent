@@ -1,6 +1,6 @@
 location = "koreacentral"
 
 tags = {
-  owner = "tm agent (aide)"
+  owner = "tm agent (taide)"
   env   = "dev"
 }

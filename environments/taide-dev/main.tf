@@ -1,6 +1,6 @@
 module "ai-rg" {
   source   = "../../modules/resourcegroup"
-  name     = "aide-ai-dev-rg"
+  name     = "taide-ai-dev-rg"
   location = var.location
   tags     = var.tags
 }
@@ -9,7 +9,7 @@ module "ai-rg" {
 
 module "vnet" {
   source              = "../../modules/virtualnetwork"
-  name                = "aide-d-vnet"
+  name                = "taide-d-vnet"
   location            = var.location
   resource_group_name = module.ai-rg.name
   address_space       = ["10.160.0.0/24"]
@@ -18,7 +18,7 @@ module "vnet" {
 
 module "subnet_private_endpoint" {
   source              = "../../modules/subnet"
-  name                = "aide-pe-d-snet"
+  name                = "taide-pe-d-snet"
   resource_group_name = module.ai-rg.name
   vnet_name           = module.vnet.name
   address_prefixes    = ["10.160.0.0/25"]
@@ -33,7 +33,7 @@ module "openai_dns" {
 
 module "openai_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "aide-d-openai-dns-link"
+  name                = "taide-d-openai-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.openai_dns.name
   vnet_id             = module.vnet.id
@@ -48,7 +48,7 @@ module "cog_dns" {
 
 module "cog_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "aide-d-cog-dns-link"
+  name                = "taide-d-cog-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.cog_dns.name
   vnet_id             = module.vnet.id
@@ -63,7 +63,7 @@ module "serviceai_dns" {
 
 module "serviceai_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "aide-d-serviceai-dns-link"
+  name                = "taide-d-serviceai-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.serviceai_dns.name
   vnet_id             = module.vnet.id
@@ -80,7 +80,7 @@ module "serviceai_dns_link" {
 #
 # module "search_dns_link" {
 #   source              = "../../modules/privatednszonelink"
-#   name                = "aide-d-search-dns-link"
+#   name                = "taide-d-search-dns-link"
 #   resource_group_name = module.ai-rg.name
 #   dns_zone_name       = module.search_dns.name
 #   vnet_id             = module.vnet.id
@@ -95,7 +95,7 @@ module "acr_dns" {
 
 module "acr_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "aide-d-acr-dns-link"
+  name                = "taide-d-acr-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.acr_dns.name
   vnet_id             = module.vnet.id
@@ -106,7 +106,7 @@ module "acr_dns_link" {
 module "foundry" {
   source = "../../modules/foundry"
 
-  name                = "aide-d-msf"
+  name                = "taide-d-msf"
   location            = "EastUS2"
   resource_group_name = module.ai-rg.name
   tags                = var.tags
@@ -148,7 +148,7 @@ module "foundry" {
 module "foundry_pe" {
   source = "../../modules/privateendpoint"
 
-  name                = "aide-d-msf-pe"
+  name                = "taide-d-msf-pe"
   location            = var.location
   resource_group_name = module.ai-rg.name
   subnet_id           = module.subnet_private_endpoint.id
@@ -170,7 +170,7 @@ module "foundry_pe" {
 # module "ai_search" {
 #   source = "../../modules/aisearch"
 #
-#   name                = "aide-d-srch01"
+#   name                = "taide-d-srch01"
 #   location            = var.location
 #   resource_group_name = module.ai-rg.name
 #   sku                 = "basic"
@@ -180,7 +180,7 @@ module "foundry_pe" {
 # module "search_pe" {
 #   source = "../../modules/privateendpoint"
 #
-#   name                = "aide-d-srch01-pe"
+#   name                = "taide-d-srch01-pe"
 #   location            = var.location
 #   resource_group_name = module.ai-rg.name
 #   subnet_id           = module.subnet_private_endpoint.id
@@ -198,7 +198,7 @@ module "foundry_pe" {
 module "acr" {
   source = "../../modules/containerregistry"
 
-  name                = "aidedevcr"
+  name                = "taidedevcr"
   location            = var.location
   resource_group_name = module.ai-rg.name
   sku                 = "Premium"
@@ -208,7 +208,7 @@ module "acr" {
 module "acr_pe" {
   source = "../../modules/privateendpoint"
 
-  name                = "aidedevcr-pe"
+  name                = "taidedevcr-pe"
   location            = var.location
   resource_group_name = module.ai-rg.name
   subnet_id           = module.subnet_private_endpoint.id
