@@ -15,10 +15,12 @@
 │   ├── privateendpoint/      # Private Endpoint
 │   ├── foundry/              # AI Foundry (Cognitive Account: AIServices) + 모델 배포
 │   ├── aisearch/             # Azure AI Search
-│   └── containerregistry/    # Azure Container Registry (Premium)
+│   ├── containerregistry/    # Azure Container Registry (Premium)
+│   └── serviceprincipal/     # CI/CD 연동용 Entra ID App + Service Principal
 └── environments/
     ├── taide-dev/         # 개발 환경
-    └── taide-prd/         # 운영 환경
+    ├── taide-prd/         # 운영 환경
+    └── cicd/              # CI/CD용 공용 Service Principal + Role Assignment
 ```
 
 ## ceoagent-dev 대비 변경/제외 사항
@@ -82,6 +84,33 @@ VNet 주소 공간은 `taide-dev` = `10.160.0.0/24`, `taide-prd` = `10.161.0.0/2
 | text-embedding-3-large | 1 | 12003 | 1964 |
 
 capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000 TPM), 배포 유형은 모두 `GlobalStandard`(글로벌 표준)입니다.
+
+## CI/CD 연동용 Service Principal (`environments/cicd`)
+
+별도 CI/CD 파이프라인이 `taidedevcr`/`taideprdcr`에 이미지를 push/pull할 수 있도록, dev/prd
+공용 Service Principal(`taide-cicd-acr-sp`)과 Role Assignment를 `environments/cicd`에
+따로 구성했습니다.
+
+- **SP 구성**: dev/prd 공용 1개 (`modules/serviceprincipal`이 Entra ID App 등록 +
+  Service Principal + 클라이언트 시크릿을 생성).
+- **권한**: `AcrPush`(push+pull) — 이미지를 빌드해 push하고 필요 시 pull도 하는 일반적인
+  CI/CD 빌드 파이프라인에 맞춘 권한입니다.
+- **범위(scope)**: ACR 리소스 단위가 아니라 **리소스그룹 단위**(`taide-ai-dev-rg`,
+  `taide-ai-prd-rg`)로 부여했습니다. `AcrPush`는 Container Registry 리소스 타입에만
+  의미가 있는 액션이라, RG 단위로 줘도 실질적으로는 해당 RG 안의 ACR에만 적용됩니다.
+- **시크릿 로테이션**: 기본 365일 유효(`secret_validity_days` 변수)이며, `time_rotating`
+  리소스로 관리되어 유효기간이 지나야만 다음 apply 때 새 시크릿으로 교체됩니다(매 apply마다
+  바뀌지 않음).
+- **배포 순서**: `environments/cicd`는 `data "azurerm_resource_group"`로 dev/prd
+  리소스그룹을 조회하므로, **taide-dev/taide-prd가 먼저 배포되어 있어야** 합니다.
+- **자격증명 확인**: `terraform apply` 후 `terraform output client_id` /
+  `terraform output tenant_id` / `terraform output -raw client_secret`으로 값을 꺼내
+  CI/CD 플랫폼의 시크릿 저장소에 등록하세요. 시크릿은 `terraform.tfstate`에도 평문으로
+  남으므로(다른 환경과 마찬가지로 `.gitignore`에 의해 git에는 커밋되지 않음) state 파일
+  자체의 접근 권한 관리가 중요합니다.
+- **사전 권한 요건**: 이 환경은 Azure 구독 권한이 아니라 **Entra ID(Azure AD)에서 앱 등록
+  권한**(Application Administrator/Cloud Application Administrator 역할, 또는 테넌트가
+  일반 사용자의 앱 등록을 허용하는 설정)이 있어야 `terraform apply`가 성공합니다.
 
 ## 사용법
 
