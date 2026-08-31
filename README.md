@@ -145,6 +145,25 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
   Administrator/Cloud Application Administrator 역할, 또는 테넌트가 일반 사용자의 앱 등록을
   허용하는 설정)이 모두 있어야 `terraform apply`가 성공합니다.
 
+## 개발자 전달용 엔드포인트 목록
+
+`environments/aiden-dev`, `environments/aiden-prd` 각각에 `outputs.tf`를 추가해, `04. 리소스
+구성 내역` 시트의 Azure 엔드포인트 표(AOAI/ACR, env, Endpoint, Port)에 대응하는 값을
+`terraform apply` 직후 바로 뽑을 수 있게 했습니다 (`terraform output`).
+
+| 리소스 | env | Endpoint | Terraform output | Port |
+|---|---|---|---|---|
+| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.openai.azure.com/` | `aoai_openai_endpoint` | 443 |
+| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.cognitiveservices.azure.com` | `aoai_cognitiveservices_endpoint` | 443 |
+| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.services.ai.azure.com` | `aoai_services_ai_endpoint` | 443 |
+| ACR | Dev/Prd | `https://aiden{dev,prd}cr.azurecr.io` | `acr_login_server_endpoint` | 443 |
+| ACR | Dev/Prd | `https://aiden{dev,prd}cr.koreacentral.data.azurecr.io` | `acr_data_endpoints` | 443 |
+
+ACR의 지역별 전용 데이터 엔드포인트(`<registry>.<region>.data.azurecr.io`)를 실제로 노출하기
+위해 `modules/containerregistry`의 `data_endpoint_enabled` 기본값을 `true`로 설정했습니다
+(Premium SKU에서만 지원). IP는 배포 후 실제 리졸브된 값을 확인해 채워야 합니다(Private
+Endpoint 구성이라 고정 IP가 아닌 VNet 대역 내 사설 IP가 할당됨).
+
 ## 사용법
 
 ```bash

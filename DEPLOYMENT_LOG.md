@@ -100,3 +100,18 @@ Project 1개). 아직 `terraform apply`는 하지 않음(Azure에 배포된 리�
   세션이라 `skinc-aide` 테넌트 리소스에 접근 못 해 인증 에러로 중단됨(MFA 필요, 대화형 로그인
   필요 — `az login --tenant 06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) — 문법/로직은 검증됐고
   실제 apply 전 사용자가 직접 로그인해야 함.
+
+## 2026-08-31 — 개발자 전달용 엔드포인트 output 추가 + ACR 데이터 엔드포인트 활성화
+
+`04. 리소스 구성 내역` 시트의 Azure 엔드포인트 표(AOAI 3종 + ACR 로그인서버/데이터 엔드포인트,
+dev/prd)를 배포 후 바로 전달할 수 있도록 `environments/aiden-dev`, `environments/aiden-prd`에
+`outputs.tf`를 추가함 (`aoai_openai_endpoint`, `aoai_cognitiveservices_endpoint`,
+`aoai_services_ai_endpoint`, `acr_login_server_endpoint`, `acr_data_endpoints`).
+
+시트에 있던 `<registry>.<region>.data.azurecr.io`(ACR 지역별 전용 데이터 엔드포인트)가 기존
+코드에서는 비활성화 상태(`data_endpoint_enabled` 기본값 false)라 실제로 존재하지 않았음 —
+사용자 확인 후 `modules/containerregistry`의 기본값을 `true`로 변경해 실제로 생성되도록 함
+(Premium SKU 필요, 이미 Premium 사용 중이라 문제 없음).
+
+fmt/init/validate 통과(dev/prd 모두). `terraform plan`은 이전과 동일하게 skinc-aide 테넌트
+로그인이 안 된 상태라 인증 에러로 중단됨 — 코드 자체는 유효함.

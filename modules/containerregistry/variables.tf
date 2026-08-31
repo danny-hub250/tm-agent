@@ -17,3 +17,9 @@ variable "admin_enabled" {
   type    = bool
   default = false
 }
+
+variable "data_endpoint_enabled" {
+  description = "지역별 전용 데이터 엔드포인트(<registry>.<region>.data.azurecr.io) 활성화 여부. Premium SKU 필요"
+  type        = bool
+  default     = true
+}
