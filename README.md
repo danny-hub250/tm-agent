@@ -161,8 +161,16 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
 
 ACR의 지역별 전용 데이터 엔드포인트(`<registry>.<region>.data.azurecr.io`)를 실제로 노출하기
 위해 `modules/containerregistry`의 `data_endpoint_enabled` 기본값을 `true`로 설정했습니다
-(Premium SKU에서만 지원). IP는 배포 후 실제 리졸브된 값을 확인해 채워야 합니다(Private
-Endpoint 구성이라 고정 IP가 아닌 VNet 대역 내 사설 IP가 할당됨).
+(Premium SKU에서만 지원).
+
+### 방화벽 신청용 IP 확인 (`firewall_endpoints`)
+
+위 표의 IP는 Private Endpoint 특성상 고정값이 아니라 배포 시점에 VNet 대역 내에서 할당되는
+사설 IP라, 미리 채울 수 없습니다. 대신 `terraform apply` 후 `terraform output -json
+firewall_endpoints`로 각 환경의 Foundry PE(3개 FQDN) + ACR PE(2개 FQDN, 로그인서버·데이터
+엔드포인트)에 실제 할당된 `{fqdn, ip_addresses}` 목록을 바로 확인할 수 있습니다
+(`modules/privateendpoint`의 `dns_configs` output, `azurerm_private_endpoint`의
+`custom_dns_configs`를 그대로 노출). 방화벽 신청 문서에는 이 값을 그대로 사용하면 됩니다.
 
 ## 사용법
 

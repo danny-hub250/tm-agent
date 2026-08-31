@@ -19,3 +19,11 @@ output "acr_login_server_endpoint" {
 output "acr_data_endpoints" {
   value = [for h in module.acr.data_endpoint_host_names : "https://${h}"]
 }
+
+output "firewall_endpoints" {
+  description = "방화벽 신청용 FQDN-IP 매핑 (Foundry PE + ACR PE, {fqdn, ip_addresses})"
+  value = concat(
+    module.foundry_pe.dns_configs,
+    module.acr_pe.dns_configs,
+  )
+}

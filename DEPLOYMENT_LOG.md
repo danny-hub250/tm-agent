@@ -115,3 +115,16 @@ dev/prd)를 배포 후 바로 전달할 수 있도록 `environments/aiden-dev`, 
 
 fmt/init/validate 통과(dev/prd 모두). `terraform plan`은 이전과 동일하게 skinc-aide 테넌트
 로그인이 안 된 상태라 인증 에러로 중단됨 — 코드 자체는 유효함.
+
+## 2026-08-31 — 방화벽 신청용 Private Endpoint IP-FQDN 매핑 output 추가
+
+사용자가 참고 프로젝트(audit-d-msf-pe, auditdevcr)의 "DNS 구성" 화면을 첨부하며 Private
+Endpoint의 IP-FQDN 매핑 정보가 필요하다고 함(방화벽 신청용). 확인 결과 DNS Private Zone 구조
+(ACR은 zone 1개로 로그인서버·데이터 엔드포인트 두 FQDN을 모두 커버, Foundry는 zone 3개)는
+기존 코드와 이미 일치해 변경 불필요. ACR PE 리소스 이름은 `-pe` 접미사 유지로 확정(질문 결과).
+
+`modules/privateendpoint`에 `dns_configs` output(`azurerm_private_endpoint.custom_dns_configs`,
+`{fqdn, ip_addresses}` 목록)을 추가하고, `environments/aiden-dev`/`aiden-prd`에
+`firewall_endpoints` output(Foundry PE + ACR PE dns_configs를 합친 목록)을 추가함 — 배포 후
+`terraform output -json firewall_endpoints`로 방화벽 신청에 필요한 실제 사설 IP를 바로 확인
+가능. fmt/init/validate 통과.
