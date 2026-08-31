@@ -77,3 +77,9 @@
 
 fmt/init/validate/plan 모두 통과 (dev/prd 각각 21개 리소스 생성 예정 — 기존 20개 + Foundry
 Project 1개). 아직 `terraform apply`는 하지 않음(Azure에 배포된 리소스 없음).
+
+## 2026-08-31 — CI/CD Service Principal 이름 변경
+
+`environments/cicd`의 SP `display_name`을 `aiden-cicd-acr-sp` → **`aidencr-sp`**로 변경함
+(사용자 요청). ACR push/pull용 SP라는 용도만 명확히 드러내는 짧은 이름으로 단순화. 역할/스코프
+(AcrPush, dev·prd RG 단위) 등 나머지 설정은 변경 없음. fmt/validate 통과, 아직 apply 안 함.

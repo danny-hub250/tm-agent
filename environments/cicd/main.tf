@@ -6,7 +6,7 @@
 module "cicd_sp" {
   source = "../../modules/serviceprincipal"
 
-  display_name = "aiden-cicd-acr-sp"
+  display_name = "aidencr-sp"
 }
 
 data "azurerm_resource_group" "dev" {

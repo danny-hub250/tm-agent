@@ -94,7 +94,7 @@ System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록�
 ## CI/CD 연동용 Service Principal (`environments/cicd`)
 
 별도 CI/CD 파이프라인이 `aidendevcr`/`aidenprdcr`에 이미지를 push/pull할 수 있도록, dev/prd
-공용 Service Principal(`aiden-cicd-acr-sp`)과 Role Assignment를 `environments/cicd`에
+공용 Service Principal(`aidencr-sp`)과 Role Assignment를 `environments/cicd`에
 따로 구성했습니다.
 
 - **SP 구성**: dev/prd 공용 1개 (`modules/serviceprincipal`이 Entra ID App 등록 +
