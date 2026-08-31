@@ -91,19 +91,39 @@ capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000
 함께 생성합니다. 두 환경 모두 `aiden-{d,p}-msf-aidenagent`라는 이름으로 프로젝트를 생성하며,
 System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록을 요구함).
 
-## CI/CD 연동용 Service Principal (`environments/cicd`)
+## 배포 대상 구독
 
-별도 CI/CD 파이프라인이 `aidendevcr`/`aidenprdcr`에 이미지를 push/pull할 수 있도록, dev/prd
-공용 Service Principal(`aidencr-sp`)과 Role Assignment를 `environments/cicd`에
-따로 구성했습니다.
+`aiden-dev`/`aiden-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/
+`tenant_id`를 명시).
+
+| 환경 | 구독 이름 | 구독 ID |
+|---|---|---|
+| aiden-dev | `aide-dev` | `3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb` |
+| aiden-prd | `aide-prd` | `dc07dd36-71ed-4355-8c70-0a753a948c63` |
+
+두 구독 모두 테넌트 `skinc-aide`(`taidesk.onmicrosoft.com`, tenant id
+`06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) 소속입니다. `terraform apply` 전 이 테넌트로
+`az login --tenant 06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`이 되어 있어야 합니다(별도 조직
+계정이라 MFA 등 대화형 로그인 필요).
+
+## CI/CD 연동용 Service Principal + 커스텀 Role (`environments/cicd`)
+
+별도 CI/CD 파이프라인이 `aidendevcr`/`aidenprdcr`에 접근할 수 있도록, dev/prd 공용 Service
+Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니다.
 
 - **SP 구성**: dev/prd 공용 1개 (`modules/serviceprincipal`이 Entra ID App 등록 +
-  Service Principal + 클라이언트 시크릿을 생성).
-- **권한**: `AcrPush`(push+pull) — 이미지를 빌드해 push하고 필요 시 pull도 하는 일반적인
-  CI/CD 빌드 파이프라인에 맞춘 권한입니다.
-- **범위(scope)**: ACR 리소스 단위가 아니라 **리소스그룹 단위**(`aiden-ai-dev-rg`,
-  `aiden-ai-prd-rg`)로 부여했습니다. `AcrPush`는 Container Registry 리소스 타입에만
-  의미가 있는 액션이라, RG 단위로 줘도 실질적으로는 해당 RG 안의 ACR에만 적용됩니다.
+  Service Principal + 클라이언트 시크릿을 생성). 이름은 `aidencr-sp`.
+- **권한**: 참고 프로젝트(skbax)의 `full-admin-acr` 커스텀 역할을 그대로 재현한
+  `azurerm_role_definition`(ACR 등록/삭제/자격증명/replication/webhook/task 등 113개 액션 —
+  Container Registry에 대한 전권). 내장 역할 `AcrPush`보다 넓은 범위이므로 필요 이상의 권한이
+  아닌지 주기적으로 재검토하는 것을 권장합니다.
+- **범위(scope)**: `aiden-ai-dev-rg`/`aiden-ai-prd-rg` **리소스그룹 단위**로 role
+  assignment. 역할 자체의 `assignable_scopes`는 `aide-dev`/`aide-prd` 두 구독 모두를
+  포함하도록 만들어(참고 프로젝트와 동일한 패턴) 하나의 역할 정의를 양쪽에서 재사용합니다.
+- **구독 분리 대응**: dev/prd가 서로 다른 구독이라, `providers.tf`에 `azurerm.dev`/
+  `azurerm.prd` 두 개의 provider alias를 두고 각 리소스그룹 조회·role assignment에
+  명시적으로 지정합니다. SP(앱 등록) 자체는 테넌트 단위 리소스라 별칭 없는 단일 `azuread`
+  provider로 한 번만 생성합니다.
 - **시크릿 로테이션**: 기본 365일 유효(`secret_validity_days` 변수)이며, `time_rotating`
   리소스로 관리되어 유효기간이 지나야만 다음 apply 때 새 시크릿으로 교체됩니다(매 apply마다
   바뀌지 않음).
@@ -114,9 +134,10 @@ System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록�
   CI/CD 플랫폼의 시크릿 저장소에 등록하세요. 시크릿은 `terraform.tfstate`에도 평문으로
   남으므로(다른 환경과 마찬가지로 `.gitignore`에 의해 git에는 커밋되지 않음) state 파일
   자체의 접근 권한 관리가 중요합니다.
-- **사전 권한 요건**: 이 환경은 Azure 구독 권한이 아니라 **Entra ID(Azure AD)에서 앱 등록
-  권한**(Application Administrator/Cloud Application Administrator 역할, 또는 테넌트가
-  일반 사용자의 앱 등록을 허용하는 설정)이 있어야 `terraform apply`가 성공합니다.
+- **사전 권한 요건**: Azure 구독 권한(커스텀 역할 정의를 만들 수 있는 `Owner` 또는
+  `User Access Administrator`)과, **Entra ID(Azure AD)에서 앱 등록 권한**(Application
+  Administrator/Cloud Application Administrator 역할, 또는 테넌트가 일반 사용자의 앱 등록을
+  허용하는 설정)이 모두 있어야 `terraform apply`가 성공합니다.
 
 ## 사용법
 

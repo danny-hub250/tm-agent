@@ -83,3 +83,20 @@ Project 1개). 아직 `terraform apply`는 하지 않음(Azure에 배포된 리�
 `environments/cicd`의 SP `display_name`을 `aiden-cicd-acr-sp` → **`aidencr-sp`**로 변경함
 (사용자 요청). ACR push/pull용 SP라는 용도만 명확히 드러내는 짧은 이름으로 단순화. 역할/스코프
 (AcrPush, dev·prd RG 단위) 등 나머지 설정은 변경 없음. fmt/validate 통과, 아직 apply 안 함.
+
+## 2026-08-31 — 배포 대상 구독 확정(aide-dev/aide-prd) + CI/CD 역할을 full-admin-acr 커스텀 롤로 교체
+
+- `aiden-dev`/`aiden-prd`의 실제 배포 대상을 그동안 쓰던 `mySUNI AI Portal - LJK`(테넌트
+  SK Inc.)에서, 프로젝트 전용 구독인 **`aide-dev`(3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb)**/
+  **`aide-prd`(dc07dd36-71ed-4355-8c70-0a753a948c63)**(테넌트 `skinc-aide` /
+  `taidesk.onmicrosoft.com`)로 확정. 각 환경 `providers.tf`에 `subscription_id`/`tenant_id`
+  를 명시해 az cli의 현재 활성 구독과 무관하게 항상 올바른 구독을 타겟하도록 함.
+- `environments/cicd`의 SP 권한을 내장 역할 `AcrPush`에서, 참고 프로젝트(skbax)가 쓰던
+  **`full-admin-acr` 커스텀 역할**(ACR 관리 전반 113개 액션)을 그대로 재현한
+  `azurerm_role_definition`으로 교체. dev/prd가 서로 다른 구독이라 `azurerm.dev`/
+  `azurerm.prd` provider alias를 나눠 각 리소스그룹에 role assignment를 생성하고, 역할
+  정의 자체는 `assignable_scopes`에 두 구독을 모두 넣어 하나로 공유.
+- fmt/init/validate 통과. `terraform plan`은 현재 로그인된 az cli 계정이 `mySUNI` 테넌트
+  세션이라 `skinc-aide` 테넌트 리소스에 접근 못 해 인증 에러로 중단됨(MFA 필요, 대화형 로그인
+  필요 — `az login --tenant 06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) — 문법/로직은 검증됐고
+  실제 apply 전 사용자가 직접 로그인해야 함.
