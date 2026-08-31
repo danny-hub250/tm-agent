@@ -144,3 +144,28 @@ Endpoint의 IP-FQDN 매핑 정보가 필요하다고 함(방화벽 신청용). �
 az login(`--tenant 06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) 완료 후 처음으로 `terraform plan`이
 정상적으로 끝까지 수행됨 — aiden-dev/aiden-prd 각각 21개 리소스 추가 예정, 삭제/변경 없음.
 아직 apply는 하지 않음(사용자가 배포 직전 일시 중단 요청).
+
+## 2026-08-31 — 프로젝트 네이밍 `aiden` → `aide`로 되돌림
+
+사용자 요청으로 프로젝트 닉네임/리소스 프리픽스를 `aiden`에서 **`aide`**로 다시 변경함 (폴더명,
+Azure 리소스 이름 문자열, owner 태그, README, `environments/cicd`). 공교롭게도 이 이름은 실제
+배포 대상 구독 이름(`aide-dev`/`aide-prd`)과도 정확히 일치하게 됨. 이전 절들의 `aiden-*` 기록은
+그대로 보존하며, 이후 재배포 시에는 `aide-*` 이름으로 생성됨:
+
+| 리소스 | 변경 전 (aiden) | 변경 후 (aide) |
+|---|---|---|
+| 환경 폴더 | `environments/aiden-dev`, `environments/aiden-prd` | `environments/aide-dev`, `environments/aide-prd` |
+| Resource Group | `aiden-ai-dev-rg` / `aiden-ai-prd-rg` | `aide-ai-dev-rg` / `aide-ai-prd-rg` |
+| AI Foundry | `aiden-d-msf` / `aiden-p-msf` | `aide-d-msf` / `aide-p-msf` |
+| Foundry Project | `aiden-{d,p}-msf-aidenagent` | `aide-{d,p}-msf-aideagent` |
+| Container Registry | `aidendevcr` / `aidenprdcr` | `aidedevcr` / `aideprdcr` |
+| CI/CD SP | `aidencr-sp` | `aidecr-sp` |
+| owner 태그 | `tm agent (aiden)` | `tm agent (aide)` |
+
+fmt/init/validate 통과(aide-dev, aide-prd, cicd 모두). 아직 미해결 상태로 남아있는 것:
+- `modules/foundry`의 Foundry Project 생성 시 `allowProjectManagement` 관련 설정 누락 버그
+  (직전 aiden-dev apply에서 발견, 아직 미수정)
+- text-embedding-3-large capacity(12003)가 이 구독의 quota 한도(10000)를 초과하는 문제
+  (아직 미해결)
+
+두 문제 모두 이번 rename 작업 범위 밖이라 손대지 않음.

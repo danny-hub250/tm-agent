@@ -1,6 +1,6 @@
-# TM Agent (aiden) - Azure IaC
+# TM Agent (aide) - Azure IaC
 
-`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(aiden) 프로젝트용 Terraform 코드입니다.
+`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(aide) 프로젝트용 Terraform 코드입니다.
 
 ## 구조
 
@@ -18,8 +18,8 @@
 │   ├── containerregistry/    # Azure Container Registry (Premium)
 │   └── serviceprincipal/     # CI/CD 연동용 Entra ID App + Service Principal
 └── environments/
-    ├── aiden-dev/         # 개발 환경
-    ├── aiden-prd/         # 운영 환경
+    ├── aide-dev/         # 개발 환경
+    ├── aide-prd/         # 운영 환경
     └── cicd/              # CI/CD용 공용 Service Principal + Role Assignment
 ```
 
@@ -37,27 +37,27 @@
 
 | key   | value                         |
 |-------|-------------------------------|
-| owner | `tm agent (aiden)`             |
-| env   | `dev` (aiden-dev) / `prd` (aiden-prd) |
+| owner | `tm agent (aide)`             |
+| env   | `dev` (aide-dev) / `prd` (aide-prd) |
 
 ## 리소스 이름 규칙
 
-폴더/모듈 이름은 `aiden-dev`, `aiden-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
+폴더/모듈 이름은 `aide-dev`, `aide-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
 
-| 리소스 | aiden-dev | aiden-prd |
+| 리소스 | aide-dev | aide-prd |
 |---|---|---|
-| Resource Group | `aiden-ai-dev-rg` | `aiden-ai-prd-rg` |
-| VNet | `aiden-d-vnet` | `aiden-p-vnet` |
-| PE Subnet | `aiden-pe-d-snet` | `aiden-pe-p-snet` |
-| AI Foundry | `aiden-d-msf` | `aiden-p-msf` |
-| AI Foundry PE | `aiden-d-msf-pe` | `aiden-p-msf-pe` |
-| Foundry Project | `aiden-d-msf-aidenagent` | `aiden-p-msf-aidenagent` |
-| AI Search (비활성화) | `aiden-d-srch01` | `aiden-p-srch01` |
-| AI Search PE (비활성화) | `aiden-d-srch01-pe` | `aiden-p-srch01-pe` |
-| Container Registry | `aidendevcr` | `aidenprdcr` |
-| Container Registry PE | `aidendevcr-pe` | `aidenprdcr-pe` |
+| Resource Group | `aide-ai-dev-rg` | `aide-ai-prd-rg` |
+| VNet | `aide-d-vnet` | `aide-p-vnet` |
+| PE Subnet | `aide-pe-d-snet` | `aide-pe-p-snet` |
+| AI Foundry | `aide-d-msf` | `aide-p-msf` |
+| AI Foundry PE | `aide-d-msf-pe` | `aide-p-msf-pe` |
+| Foundry Project | `aide-d-msf-aideagent` | `aide-p-msf-aideagent` |
+| AI Search (비활성화) | `aide-d-srch01` | `aide-p-srch01` |
+| AI Search PE (비활성화) | `aide-d-srch01-pe` | `aide-p-srch01-pe` |
+| Container Registry | `aidedevcr` | `aideprdcr` |
+| Container Registry PE | `aidedevcr-pe` | `aideprdcr-pe` |
 
-Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `aidendevcr`/`aidenprdcr`로 지었습니다.
+Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `aidedevcr`/`aideprdcr`로 지었습니다.
 
 > **AI Search 비활성화 안내**: AI Search는 AKS 내 OSS로 대체 설치 예정이라 현재 `main.tf`에서 관련 모듈(`ai_search`, `search_pe`, `search_dns`, `search_dns_link`)이 주석 처리되어 실제로 배포되지 않습니다. 위 이름/SKU 표기는 향후 재사용 시 참고용입니다.
 
@@ -70,7 +70,7 @@ Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)
 | Container Registry | `Premium` (Private Endpoint 사용 요건) |
 | AI Search | `basic` |
 
-VNet 주소 공간은 `aiden-dev` = `10.70.254.0/27`, `aiden-prd` = `10.70.254.32/27`로 서로
+VNet 주소 공간은 `aide-dev` = `10.70.254.0/27`, `aide-prd` = `10.70.254.32/27`로 서로
 겹치지 않게 나눴습니다(사내 IP 관리 시트 기준 확정값). PE 서브넷은 각 VNet의 `/27` 전체
 대역을 그대로 사용합니다(환경당 서브넷이 1개뿐이라 별도로 쪼개지 않음). VNet peering(허브
 VNet 연결)은 이번 범위에서 제외했습니다 — 추후 별도로 추가할 예정입니다.
@@ -79,7 +79,7 @@ VNet 연결)은 이번 범위에서 제외했습니다 — 추후 별도로 추�
 
 `foundry` 모듈은 `model_deployments`(map, `for_each`)로 Foundry 계정 하나에 여러 OpenAI 모델을 배포할 수 있습니다. 두 환경 모두 아래 5개 모델을 배포하며, 버전 업그레이드 정책은 전 배포 공통으로 `version_upgrade_option = "OnceCurrentVersionExpired"`(현재 버전이 만료되는 경우)입니다.
 
-| 배포 이름 | 모델 버전 | aiden-dev capacity | aiden-prd capacity |
+| 배포 이름 | 모델 버전 | aide-dev capacity | aide-prd capacity |
 |---|---|---|---|
 | gpt-5.5 | 2026-04-24 | 5004 | 5997 |
 | gpt-5.6-luna | 2026-07-09 | 3007 | 2997 |
@@ -91,18 +91,18 @@ capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000
 
 `foundry` 모듈은 `project_name`을 지정하면 Foundry 계정 하위에 **Foundry Project**
 (`azurerm_cognitive_account_project`, ARM 타입 `Microsoft.CognitiveServices/accounts/projects`)도
-함께 생성합니다. 두 환경 모두 `aiden-{d,p}-msf-aidenagent`라는 이름으로 프로젝트를 생성하며,
+함께 생성합니다. 두 환경 모두 `aide-{d,p}-msf-aideagent`라는 이름으로 프로젝트를 생성하며,
 System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록을 요구함).
 
 ## 배포 대상 구독
 
-`aiden-dev`/`aiden-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/
+`aide-dev`/`aide-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/
 `tenant_id`를 명시).
 
 | 환경 | 구독 이름 | 구독 ID |
 |---|---|---|
-| aiden-dev | `aide-dev` | `3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb` |
-| aiden-prd | `aide-prd` | `dc07dd36-71ed-4355-8c70-0a753a948c63` |
+| aide-dev | `aide-dev` | `3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb` |
+| aide-prd | `aide-prd` | `dc07dd36-71ed-4355-8c70-0a753a948c63` |
 
 두 구독 모두 테넌트 `skinc-aide`(`taidesk.onmicrosoft.com`, tenant id
 `06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) 소속입니다. `terraform apply` 전 이 테넌트로
@@ -111,16 +111,16 @@ System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록�
 
 ## CI/CD 연동용 Service Principal + 커스텀 Role (`environments/cicd`)
 
-별도 CI/CD 파이프라인이 `aidendevcr`/`aidenprdcr`에 접근할 수 있도록, dev/prd 공용 Service
+별도 CI/CD 파이프라인이 `aidedevcr`/`aideprdcr`에 접근할 수 있도록, dev/prd 공용 Service
 Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니다.
 
 - **SP 구성**: dev/prd 공용 1개 (`modules/serviceprincipal`이 Entra ID App 등록 +
-  Service Principal + 클라이언트 시크릿을 생성). 이름은 `aidencr-sp`.
+  Service Principal + 클라이언트 시크릿을 생성). 이름은 `aidecr-sp`.
 - **권한**: 참고 프로젝트(skbax)의 `full-admin-acr` 커스텀 역할을 그대로 재현한
   `azurerm_role_definition`(ACR 등록/삭제/자격증명/replication/webhook/task 등 113개 액션 —
   Container Registry에 대한 전권). 내장 역할 `AcrPush`보다 넓은 범위이므로 필요 이상의 권한이
   아닌지 주기적으로 재검토하는 것을 권장합니다.
-- **범위(scope)**: `aiden-ai-dev-rg`/`aiden-ai-prd-rg` **리소스그룹 단위**로 role
+- **범위(scope)**: `aide-ai-dev-rg`/`aide-ai-prd-rg` **리소스그룹 단위**로 role
   assignment. 역할 자체의 `assignable_scopes`는 `aide-dev`/`aide-prd` 두 구독 모두를
   포함하도록 만들어(참고 프로젝트와 동일한 패턴) 하나의 역할 정의를 양쪽에서 재사용합니다.
 - **구독 분리 대응**: dev/prd가 서로 다른 구독이라, `providers.tf`에 `azurerm.dev`/
@@ -131,7 +131,7 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
   리소스로 관리되어 유효기간이 지나야만 다음 apply 때 새 시크릿으로 교체됩니다(매 apply마다
   바뀌지 않음).
 - **배포 순서**: `environments/cicd`는 `data "azurerm_resource_group"`로 dev/prd
-  리소스그룹을 조회하므로, **aiden-dev/aiden-prd가 먼저 배포되어 있어야** 합니다.
+  리소스그룹을 조회하므로, **aide-dev/aide-prd가 먼저 배포되어 있어야** 합니다.
 - **자격증명 확인 및 개발자 전달**: `terraform apply` 후 아래 값을 꺼내 개발자에게 전달하고,
   CI/CD 플랫폼의 시크릿 저장소에도 등록하세요.
 
@@ -150,17 +150,17 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
 
 ## 개발자 전달용 엔드포인트 목록
 
-`environments/aiden-dev`, `environments/aiden-prd` 각각에 `outputs.tf`를 추가해, `04. 리소스
+`environments/aide-dev`, `environments/aide-prd` 각각에 `outputs.tf`를 추가해, `04. 리소스
 구성 내역` 시트의 Azure 엔드포인트 표(AOAI/ACR, env, Endpoint, Port)에 대응하는 값을
 `terraform apply` 직후 바로 뽑을 수 있게 했습니다 (`terraform output`).
 
 | 리소스 | env | Endpoint | Terraform output | Port |
 |---|---|---|---|---|
-| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.openai.azure.com/` | `aoai_openai_endpoint` | 443 |
-| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.cognitiveservices.azure.com` | `aoai_cognitiveservices_endpoint` | 443 |
-| AOAI | Dev/Prd | `https://aiden-{d,p}-msf.services.ai.azure.com` | `aoai_services_ai_endpoint` | 443 |
-| ACR | Dev/Prd | `https://aiden{dev,prd}cr.azurecr.io` | `acr_login_server_endpoint` | 443 |
-| ACR | Dev/Prd | `https://aiden{dev,prd}cr.koreacentral.data.azurecr.io` | `acr_data_endpoints` | 443 |
+| AOAI | Dev/Prd | `https://aide-{d,p}-msf.openai.azure.com/` | `aoai_openai_endpoint` | 443 |
+| AOAI | Dev/Prd | `https://aide-{d,p}-msf.cognitiveservices.azure.com` | `aoai_cognitiveservices_endpoint` | 443 |
+| AOAI | Dev/Prd | `https://aide-{d,p}-msf.services.ai.azure.com` | `aoai_services_ai_endpoint` | 443 |
+| ACR | Dev/Prd | `https://aide{dev,prd}cr.azurecr.io` | `acr_login_server_endpoint` | 443 |
+| ACR | Dev/Prd | `https://aide{dev,prd}cr.koreacentral.data.azurecr.io` | `acr_data_endpoints` | 443 |
 
 ACR의 지역별 전용 데이터 엔드포인트(`<registry>.<region>.data.azurecr.io`)를 실제로 노출하기
 위해 `modules/containerregistry`의 `data_endpoint_enabled` 기본값을 `true`로 설정했습니다
@@ -178,7 +178,7 @@ firewall_endpoints`로 각 환경의 Foundry PE(3개 FQDN) + ACR PE(2개 FQDN, �
 ## 사용법
 
 ```bash
-cd environments/aiden-dev   # 또는 aiden-prd
+cd environments/aide-dev   # 또는 aide-prd
 terraform init
 terraform plan
 terraform apply
@@ -186,4 +186,4 @@ terraform apply
 
 - `terraform.tfvars.example`을 참고해 `terraform.tfvars`의 값을 환경에 맞게 조정하세요.
 - Foundry 리소스는 ceoagent-dev와 동일하게 모델 가용 리전인 `EastUS2`에 고정 배포되며, 그 외 리소스(RG, AI Search)는 `var.location`(기본 `koreacentral`)을 따릅니다.
-- 리소스 이름(`aiden-d-msf`, `aiden-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.
+- 리소스 이름(`aide-d-msf`, `aide-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.

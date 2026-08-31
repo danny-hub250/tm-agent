@@ -1,27 +1,27 @@
-# CI/CD 파이프라인이 aiden-dev/aiden-prd의 Container Registry에 push/pull(및 관리 작업)을
+# CI/CD 파이프라인이 aide-dev/aide-prd의 Container Registry에 push/pull(및 관리 작업)을
 # 할 수 있도록 만드는 공용 Service Principal + 커스텀 Role(full-admin-acr) + Role Assignment.
 #
 # - SP는 테넌트(skinc-aide / taidesk.onmicrosoft.com) 하위에 1개만 생성해 dev/prd 공용으로 사용.
-# - aiden-dev/aiden-prd는 서로 다른 구독(aide-dev / aide-prd)이라, role assignment 대상마다
+# - aide-dev/aide-prd는 서로 다른 구독(aide-dev / aide-prd)이라, role assignment 대상마다
 #   azurerm provider를 구독별로 분리해서 사용(providers.tf의 azurerm.dev / azurerm.prd).
 # - 역할은 참고 프로젝트(skbax)의 "full-admin-acr" 커스텀 역할(ACR 관리 전반)을 그대로 재현.
 #
-# 주의: aiden-dev/aiden-prd 환경(리소스그룹)이 먼저 배포되어 있어야 아래 data 조회가 성공함.
+# 주의: aide-dev/aide-prd 환경(리소스그룹)이 먼저 배포되어 있어야 아래 data 조회가 성공함.
 
 module "cicd_sp" {
   source = "../../modules/serviceprincipal"
 
-  display_name = "aidencr-sp"
+  display_name = "aidecr-sp"
 }
 
 data "azurerm_resource_group" "dev" {
   provider = azurerm.dev
-  name     = "aiden-ai-dev-rg"
+  name     = "aide-ai-dev-rg"
 }
 
 data "azurerm_resource_group" "prd" {
   provider = azurerm.prd
-  name     = "aiden-ai-prd-rg"
+  name     = "aide-ai-prd-rg"
 }
 
 resource "azurerm_role_definition" "full_admin_acr" {
