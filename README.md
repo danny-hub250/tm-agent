@@ -70,7 +70,10 @@ Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)
 | Container Registry | `Premium` (Private Endpoint 사용 요건) |
 | AI Search | `basic` |
 
-VNet 주소 공간은 `aiden-dev` = `10.160.0.0/24`, `aiden-prd` = `10.161.0.0/24` (PE 서브넷은 각각 `.0/25`)로 두어 서로 겹치지 않게 했습니다.
+VNet 주소 공간은 `aiden-dev` = `10.70.254.0/27`, `aiden-prd` = `10.70.254.32/27`로 서로
+겹치지 않게 나눴습니다(사내 IP 관리 시트 기준 확정값). PE 서브넷은 각 VNet의 `/27` 전체
+대역을 그대로 사용합니다(환경당 서브넷이 1개뿐이라 별도로 쪼개지 않음). VNet peering(허브
+VNet 연결)은 이번 범위에서 제외했습니다 — 추후 별도로 추가할 예정입니다.
 
 ## 모델 배포
 

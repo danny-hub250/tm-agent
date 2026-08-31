@@ -12,7 +12,7 @@ module "vnet" {
   name                = "aiden-d-vnet"
   location            = var.location
   resource_group_name = module.ai-rg.name
-  address_space       = ["10.160.0.0/24"]
+  address_space       = ["10.70.254.0/27"]
   tags                = var.tags
 }
 
@@ -21,7 +21,7 @@ module "subnet_private_endpoint" {
   name                = "aiden-pe-d-snet"
   resource_group_name = module.ai-rg.name
   vnet_name           = module.vnet.name
-  address_prefixes    = ["10.160.0.0/25"]
+  address_prefixes    = ["10.70.254.0/27"]
 }
 
 module "openai_dns" {

@@ -128,3 +128,19 @@ Endpoint의 IP-FQDN 매핑 정보가 필요하다고 함(방화벽 신청용). �
 `firewall_endpoints` output(Foundry PE + ACR PE dns_configs를 합친 목록)을 추가함 — 배포 후
 `terraform output -json firewall_endpoints`로 방화벽 신청에 필요한 실제 사설 IP를 바로 확인
 가능. fmt/init/validate 통과.
+
+## 2026-08-31 — VNet/Subnet CIDR 확정 (10.70.254.0/27 대역)
+
+사내 IP 관리 시트 기준으로 VNet 주소 공간을 확정함. VNet peering(허브 VNet 연결)은 이번
+범위에서 명시적으로 제외(추후 별도 작업).
+
+| 리소스 | 변경 전 | 변경 후 |
+|---|---|---|
+| aiden-d-vnet | 10.160.0.0/24 | 10.70.254.0/27 |
+| aiden-pe-d-snet | 10.160.0.0/25 | 10.70.254.0/27 |
+| aiden-p-vnet | 10.161.0.0/24 | 10.70.254.32/27 |
+| aiden-pe-p-snet | 10.161.0.0/25 | 10.70.254.32/27 |
+
+az login(`--tenant 06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`) 완료 후 처음으로 `terraform plan`이
+정상적으로 끝까지 수행됨 — aiden-dev/aiden-prd 각각 21개 리소스 추가 예정, 삭제/변경 없음.
+아직 apply는 하지 않음(사용자가 배포 직전 일시 중단 요청).
