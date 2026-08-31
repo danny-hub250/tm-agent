@@ -1,6 +1,6 @@
 module "ai-rg" {
   source   = "../../modules/resourcegroup"
-  name     = "taide-ai-dev-rg"
+  name     = "aiden-ai-prd-rg"
   location = var.location
   tags     = var.tags
 }
@@ -9,19 +9,19 @@ module "ai-rg" {
 
 module "vnet" {
   source              = "../../modules/virtualnetwork"
-  name                = "taide-d-vnet"
+  name                = "aiden-p-vnet"
   location            = var.location
   resource_group_name = module.ai-rg.name
-  address_space       = ["10.160.0.0/24"]
+  address_space       = ["10.161.0.0/24"]
   tags                = var.tags
 }
 
 module "subnet_private_endpoint" {
   source              = "../../modules/subnet"
-  name                = "taide-pe-d-snet"
+  name                = "aiden-pe-p-snet"
   resource_group_name = module.ai-rg.name
   vnet_name           = module.vnet.name
-  address_prefixes    = ["10.160.0.0/25"]
+  address_prefixes    = ["10.161.0.0/25"]
 }
 
 module "openai_dns" {
@@ -33,7 +33,7 @@ module "openai_dns" {
 
 module "openai_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "taide-d-openai-dns-link"
+  name                = "aiden-p-openai-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.openai_dns.name
   vnet_id             = module.vnet.id
@@ -48,7 +48,7 @@ module "cog_dns" {
 
 module "cog_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "taide-d-cog-dns-link"
+  name                = "aiden-p-cog-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.cog_dns.name
   vnet_id             = module.vnet.id
@@ -63,7 +63,7 @@ module "serviceai_dns" {
 
 module "serviceai_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "taide-d-serviceai-dns-link"
+  name                = "aiden-p-serviceai-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.serviceai_dns.name
   vnet_id             = module.vnet.id
@@ -80,7 +80,7 @@ module "serviceai_dns_link" {
 #
 # module "search_dns_link" {
 #   source              = "../../modules/privatednszonelink"
-#   name                = "taide-d-search-dns-link"
+#   name                = "aiden-p-search-dns-link"
 #   resource_group_name = module.ai-rg.name
 #   dns_zone_name       = module.search_dns.name
 #   vnet_id             = module.vnet.id
@@ -95,7 +95,7 @@ module "acr_dns" {
 
 module "acr_dns_link" {
   source              = "../../modules/privatednszonelink"
-  name                = "taide-d-acr-dns-link"
+  name                = "aiden-p-acr-dns-link"
   resource_group_name = module.ai-rg.name
   dns_zone_name       = module.acr_dns.name
   vnet_id             = module.vnet.id
@@ -106,41 +106,43 @@ module "acr_dns_link" {
 module "foundry" {
   source = "../../modules/foundry"
 
-  name                = "taide-d-msf"
+  name                = "aiden-p-msf"
   location            = "EastUS2"
   resource_group_name = module.ai-rg.name
   tags                = var.tags
+  project_name        = "aiden-p-msf-aidenagent"
 
   # NOTE: 2026-08-27 기준 mySUNI AI Portal - LJK 구독의 EastUS2 OpenAI GlobalStandard
-  # quota 한도가 모델당 1000(=1,000,000 TPM)으로, 원래 목표 capacity를 넘어 임시로
-  # 1000 이하로 낮춰 배포함. Azure에 quota 증설 요청 후 승인되면 아래 원래 값으로 복원할 것.
-  # (원래 목표: gpt-5.5=5004, gpt-5.6-luna=3007, gpt-5.6-sol=3990, gpt-5.6-terra=3003,
-  #  text-embedding-3-large=12003)
+  # quota가 aiden-dev 배포로 모델당 1000/1000(잔여 0)까지 이미 소진된 상태라, 원래 목표
+  # capacity를 훨씬 못 미치는 100으로 임시로 낮춰 배포함(그래도 quota 초과로 실패할 수 있음).
+  # Azure에 quota 증설 요청 후 승인되면 아래 원래 값으로 복원할 것.
+  # (원래 목표: gpt-5.5=5997, gpt-5.6-luna=2997, gpt-5.6-sol=7993, gpt-5.6-terra=6001,
+  #  text-embedding-3-large=1964)
   model_deployments = {
     "gpt-5.5" = {
       model_name    = "gpt-5.5"
       model_version = "2026-04-24"
-      capacity      = 1000
+      capacity      = 100
     }
     "gpt-5.6-luna" = {
       model_name    = "gpt-5.6-luna"
       model_version = "2026-07-09"
-      capacity      = 1000
+      capacity      = 100
     }
     "gpt-5.6-sol" = {
       model_name    = "gpt-5.6-sol"
       model_version = "2026-07-09"
-      capacity      = 1000
+      capacity      = 100
     }
     "gpt-5.6-terra" = {
       model_name    = "gpt-5.6-terra"
       model_version = "2026-07-09"
-      capacity      = 1000
+      capacity      = 100
     }
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
-      capacity      = 1000
+      capacity      = 100
     }
   }
 }
@@ -148,7 +150,7 @@ module "foundry" {
 module "foundry_pe" {
   source = "../../modules/privateendpoint"
 
-  name                = "taide-d-msf-pe"
+  name                = "aiden-p-msf-pe"
   location            = var.location
   resource_group_name = module.ai-rg.name
   subnet_id           = module.subnet_private_endpoint.id
@@ -170,7 +172,7 @@ module "foundry_pe" {
 # module "ai_search" {
 #   source = "../../modules/aisearch"
 #
-#   name                = "taide-d-srch01"
+#   name                = "aiden-p-srch01"
 #   location            = var.location
 #   resource_group_name = module.ai-rg.name
 #   sku                 = "basic"
@@ -180,7 +182,7 @@ module "foundry_pe" {
 # module "search_pe" {
 #   source = "../../modules/privateendpoint"
 #
-#   name                = "taide-d-srch01-pe"
+#   name                = "aiden-p-srch01-pe"
 #   location            = var.location
 #   resource_group_name = module.ai-rg.name
 #   subnet_id           = module.subnet_private_endpoint.id
@@ -198,7 +200,7 @@ module "foundry_pe" {
 module "acr" {
   source = "../../modules/containerregistry"
 
-  name                = "taidedevcr"
+  name                = "aidenprdcr"
   location            = var.location
   resource_group_name = module.ai-rg.name
   sku                 = "Premium"
@@ -208,7 +210,7 @@ module "acr" {
 module "acr_pe" {
   source = "../../modules/privateendpoint"
 
-  name                = "taidedevcr-pe"
+  name                = "aidenprdcr-pe"
   location            = var.location
   resource_group_name = module.ai-rg.name
   subnet_id           = module.subnet_private_endpoint.id

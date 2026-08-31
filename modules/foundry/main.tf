@@ -9,6 +9,19 @@ resource "azurerm_cognitive_account" "foundry" {
   tags                  = var.tags
 }
 
+resource "azurerm_cognitive_account_project" "this" {
+  count = var.project_name != null ? 1 : 0
+
+  name                 = var.project_name
+  cognitive_account_id = azurerm_cognitive_account.foundry.id
+  location             = var.location
+  tags                 = var.tags
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
 resource "azurerm_cognitive_deployment" "this" {
   for_each = var.model_deployments
 

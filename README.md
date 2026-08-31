@@ -1,6 +1,6 @@
-# TM Agent (taide) - Azure IaC
+# TM Agent (aiden) - Azure IaC
 
-`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(taide) 프로젝트용 Terraform 코드입니다.
+`@47. CEO Agent/Azure` (ceoagent-dev)의 구조/모듈 패턴을 기반으로 작성한 TM Agent(aiden) 프로젝트용 Terraform 코드입니다.
 
 ## 구조
 
@@ -13,13 +13,13 @@
 │   ├── privatednszone/       # Private DNS Zone
 │   ├── privatednszonelink/   # Private DNS Zone <-> VNet Link
 │   ├── privateendpoint/      # Private Endpoint
-│   ├── foundry/              # AI Foundry (Cognitive Account: AIServices) + 모델 배포
+│   ├── foundry/              # AI Foundry (Cognitive Account: AIServices) + 모델 배포 + Foundry Project
 │   ├── aisearch/             # Azure AI Search
 │   ├── containerregistry/    # Azure Container Registry (Premium)
 │   └── serviceprincipal/     # CI/CD 연동용 Entra ID App + Service Principal
 └── environments/
-    ├── taide-dev/         # 개발 환경
-    ├── taide-prd/         # 운영 환경
+    ├── aiden-dev/         # 개발 환경
+    ├── aiden-prd/         # 운영 환경
     └── cicd/              # CI/CD용 공용 Service Principal + Role Assignment
 ```
 
@@ -37,26 +37,27 @@
 
 | key   | value                         |
 |-------|-------------------------------|
-| owner | `tm agent (taide)`             |
-| env   | `dev` (taide-dev) / `prd` (taide-prd) |
+| owner | `tm agent (aiden)`             |
+| env   | `dev` (aiden-dev) / `prd` (aiden-prd) |
 
 ## 리소스 이름 규칙
 
-폴더/모듈 이름은 `taide-dev`, `taide-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
+폴더/모듈 이름은 `aiden-dev`, `aiden-prd`를 유지하되, 실제 Azure 리소스 이름은 `dev → d`, `prd → p`로 축약하고 Foundry는 `msf`, AI Search는 `srch01`로 끝나도록 명명합니다. 단, Resource Group 이름은 `dev`/`prd`를 축약하지 않고 그대로 사용합니다.
 
-| 리소스 | taide-dev | taide-prd |
+| 리소스 | aiden-dev | aiden-prd |
 |---|---|---|
-| Resource Group | `taide-ai-dev-rg` | `taide-ai-prd-rg` |
-| VNet | `taide-d-vnet` | `taide-p-vnet` |
-| PE Subnet | `taide-pe-d-snet` | `taide-pe-p-snet` |
-| AI Foundry | `taide-d-msf` | `taide-p-msf` |
-| AI Foundry PE | `taide-d-msf-pe` | `taide-p-msf-pe` |
-| AI Search (비활성화) | `taide-d-srch01` | `taide-p-srch01` |
-| AI Search PE (비활성화) | `taide-d-srch01-pe` | `taide-p-srch01-pe` |
-| Container Registry | `taidedevcr` | `taideprdcr` |
-| Container Registry PE | `taidedevcr-pe` | `taideprdcr-pe` |
+| Resource Group | `aiden-ai-dev-rg` | `aiden-ai-prd-rg` |
+| VNet | `aiden-d-vnet` | `aiden-p-vnet` |
+| PE Subnet | `aiden-pe-d-snet` | `aiden-pe-p-snet` |
+| AI Foundry | `aiden-d-msf` | `aiden-p-msf` |
+| AI Foundry PE | `aiden-d-msf-pe` | `aiden-p-msf-pe` |
+| Foundry Project | `aiden-d-msf-aidenagent` | `aiden-p-msf-aidenagent` |
+| AI Search (비활성화) | `aiden-d-srch01` | `aiden-p-srch01` |
+| AI Search PE (비활성화) | `aiden-d-srch01-pe` | `aiden-p-srch01-pe` |
+| Container Registry | `aidendevcr` | `aidenprdcr` |
+| Container Registry PE | `aidendevcr-pe` | `aidenprdcr-pe` |
 
-Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `taidedevcr`/`taideprdcr`로 지었습니다.
+Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)에 맞춰 `aidendevcr`/`aidenprdcr`로 지었습니다.
 
 > **AI Search 비활성화 안내**: AI Search는 AKS 내 OSS로 대체 설치 예정이라 현재 `main.tf`에서 관련 모듈(`ai_search`, `search_pe`, `search_dns`, `search_dns_link`)이 주석 처리되어 실제로 배포되지 않습니다. 위 이름/SKU 표기는 향후 재사용 시 참고용입니다.
 
@@ -69,13 +70,13 @@ Container Registry 이름은 Azure 제약(영숫자만 허용, 하이픈 불가)
 | Container Registry | `Premium` (Private Endpoint 사용 요건) |
 | AI Search | `basic` |
 
-VNet 주소 공간은 `taide-dev` = `10.160.0.0/24`, `taide-prd` = `10.161.0.0/24` (PE 서브넷은 각각 `.0/25`)로 두어 서로 겹치지 않게 했습니다.
+VNet 주소 공간은 `aiden-dev` = `10.160.0.0/24`, `aiden-prd` = `10.161.0.0/24` (PE 서브넷은 각각 `.0/25`)로 두어 서로 겹치지 않게 했습니다.
 
 ## 모델 배포
 
 `foundry` 모듈은 `model_deployments`(map, `for_each`)로 Foundry 계정 하나에 여러 OpenAI 모델을 배포할 수 있습니다. 두 환경 모두 아래 5개 모델을 배포하며, 버전 업그레이드 정책은 전 배포 공통으로 `version_upgrade_option = "OnceCurrentVersionExpired"`(현재 버전이 만료되는 경우)입니다.
 
-| 배포 이름 | 모델 버전 | taide-dev capacity | taide-prd capacity |
+| 배포 이름 | 모델 버전 | aiden-dev capacity | aiden-prd capacity |
 |---|---|---|---|
 | gpt-5.5 | 2026-04-24 | 5004 | 5997 |
 | gpt-5.6-luna | 2026-07-09 | 3007 | 2997 |
@@ -85,24 +86,29 @@ VNet 주소 공간은 `taide-dev` = `10.160.0.0/24`, `taide-prd` = `10.161.0.0/2
 
 capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000 TPM), 배포 유형은 모두 `GlobalStandard`(글로벌 표준)입니다.
 
+`foundry` 모듈은 `project_name`을 지정하면 Foundry 계정 하위에 **Foundry Project**
+(`azurerm_cognitive_account_project`, ARM 타입 `Microsoft.CognitiveServices/accounts/projects`)도
+함께 생성합니다. 두 환경 모두 `aiden-{d,p}-msf-aidenagent`라는 이름으로 프로젝트를 생성하며,
+System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록을 요구함).
+
 ## CI/CD 연동용 Service Principal (`environments/cicd`)
 
-별도 CI/CD 파이프라인이 `taidedevcr`/`taideprdcr`에 이미지를 push/pull할 수 있도록, dev/prd
-공용 Service Principal(`taide-cicd-acr-sp`)과 Role Assignment를 `environments/cicd`에
+별도 CI/CD 파이프라인이 `aidendevcr`/`aidenprdcr`에 이미지를 push/pull할 수 있도록, dev/prd
+공용 Service Principal(`aiden-cicd-acr-sp`)과 Role Assignment를 `environments/cicd`에
 따로 구성했습니다.
 
 - **SP 구성**: dev/prd 공용 1개 (`modules/serviceprincipal`이 Entra ID App 등록 +
   Service Principal + 클라이언트 시크릿을 생성).
 - **권한**: `AcrPush`(push+pull) — 이미지를 빌드해 push하고 필요 시 pull도 하는 일반적인
   CI/CD 빌드 파이프라인에 맞춘 권한입니다.
-- **범위(scope)**: ACR 리소스 단위가 아니라 **리소스그룹 단위**(`taide-ai-dev-rg`,
-  `taide-ai-prd-rg`)로 부여했습니다. `AcrPush`는 Container Registry 리소스 타입에만
+- **범위(scope)**: ACR 리소스 단위가 아니라 **리소스그룹 단위**(`aiden-ai-dev-rg`,
+  `aiden-ai-prd-rg`)로 부여했습니다. `AcrPush`는 Container Registry 리소스 타입에만
   의미가 있는 액션이라, RG 단위로 줘도 실질적으로는 해당 RG 안의 ACR에만 적용됩니다.
 - **시크릿 로테이션**: 기본 365일 유효(`secret_validity_days` 변수)이며, `time_rotating`
   리소스로 관리되어 유효기간이 지나야만 다음 apply 때 새 시크릿으로 교체됩니다(매 apply마다
   바뀌지 않음).
 - **배포 순서**: `environments/cicd`는 `data "azurerm_resource_group"`로 dev/prd
-  리소스그룹을 조회하므로, **taide-dev/taide-prd가 먼저 배포되어 있어야** 합니다.
+  리소스그룹을 조회하므로, **aiden-dev/aiden-prd가 먼저 배포되어 있어야** 합니다.
 - **자격증명 확인**: `terraform apply` 후 `terraform output client_id` /
   `terraform output tenant_id` / `terraform output -raw client_secret`으로 값을 꺼내
   CI/CD 플랫폼의 시크릿 저장소에 등록하세요. 시크릿은 `terraform.tfstate`에도 평문으로
@@ -115,7 +121,7 @@ capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000
 ## 사용법
 
 ```bash
-cd environments/taide-dev   # 또는 taide-prd
+cd environments/aiden-dev   # 또는 aiden-prd
 terraform init
 terraform plan
 terraform apply
@@ -123,4 +129,4 @@ terraform apply
 
 - `terraform.tfvars.example`을 참고해 `terraform.tfvars`의 값을 환경에 맞게 조정하세요.
 - Foundry 리소스는 ceoagent-dev와 동일하게 모델 가용 리전인 `EastUS2`에 고정 배포되며, 그 외 리소스(RG, AI Search)는 `var.location`(기본 `koreacentral`)을 따릅니다.
-- 리소스 이름(`taide-d-msf`, `taide-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.
+- 리소스 이름(`aiden-d-msf`, `aiden-d-srch01` 등)은 Azure 전역에서 고유해야 하는 리소스이므로, 실제 배포 전 이름 충돌 여부를 확인하세요.

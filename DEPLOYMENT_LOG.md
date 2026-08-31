@@ -48,3 +48,32 @@
 | owner 태그 | `tm agent (aide)` | `tm agent (taide)` |
 
 `tm-agent-aide-iac.md`(세션 노트)는 과거 의사결정 히스토리 문서라 그대로 두었고, README.md가 현재 네이밍의 source of truth임.
+
+## 2026-08-31 — 프로젝트 네이밍 `taide` → `aiden` 전체 변경 + Foundry Project 리소스 추가
+
+사내 리소스 구성 내역 시트(`04. 리소스 구성 내역`)의 네이밍에 맞춰 프로젝트 닉네임과 리소스
+이름 프리픽스를 `taide`에서 `aiden`으로 다시 변경함 (폴더명, Azure 리소스 이름 문자열, `owner`
+태그 값, `README.md`, `environments/cicd`). 이전 절들의 `aide-*`/`taide-*` 기록은 그대로
+보존하며, 이후 재배포 시에는 `aiden-*` 이름으로 생성됨:
+
+| 리소스 | 변경 전 (taide) | 변경 후 (aiden) |
+|---|---|---|
+| 환경 폴더 | `environments/taide-dev`, `environments/taide-prd` | `environments/aiden-dev`, `environments/aiden-prd` |
+| Resource Group | `taide-ai-dev-rg` / `taide-ai-prd-rg` | `aiden-ai-dev-rg` / `aiden-ai-prd-rg` |
+| AI Foundry | `taide-d-msf` / `taide-p-msf` | `aiden-d-msf` / `aiden-p-msf` |
+| Container Registry | `taidedevcr` / `taideprdcr` | `aidendevcr` / `aidenprdcr` |
+| CI/CD SP | `taide-cicd-acr-sp` | `aiden-cicd-acr-sp` |
+| owner 태그 | `tm agent (taide)` | `tm agent (aiden)` |
+
+같은 작업에서 `modules/foundry`에 **Foundry Project**(`azurerm_cognitive_account_project`,
+`Microsoft.CognitiveServices/accounts/projects`) 리소스 생성 기능을 추가하고, 두 환경 모두
+`aiden-{d,p}-msf-aidenagent` 프로젝트를 생성하도록 연결함(System-Assigned Identity 필요 —
+리소스 자체가 identity 블록을 요구함).
+
+**의도적으로 반영하지 않은 시트 내용**: 참고 시트에는 이 외에도 (1) `ai-rg`와 별도인
+`network-rg` 분리, (2) 허브 VNet과의 Peering, (3) VNet `/27` 등 다른 주소 체계가 있었으나,
+사용자 요청 범위가 "네이밍 + Foundry Project"로 한정되어 이번엔 반영하지 않음. 필요 시 별도
+작업으로 진행.
+
+fmt/init/validate/plan 모두 통과 (dev/prd 각각 21개 리소스 생성 예정 — 기존 20개 + Foundry
+Project 1개). 아직 `terraform apply`는 하지 않음(Azure에 배포된 리소스 없음).

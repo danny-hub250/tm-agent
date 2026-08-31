@@ -2,6 +2,12 @@ variable "name" {}
 variable "resource_group_name" {}
 variable "location" {}
 
+variable "project_name" {
+  description = "Foundry Project(Microsoft.CognitiveServices/accounts/projects) 이름. null이면 생성하지 않음"
+  type        = string
+  default     = null
+}
+
 
 variable "tags" {
   type    = map(string)
