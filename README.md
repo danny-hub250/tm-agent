@@ -129,11 +129,17 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
   바뀌지 않음).
 - **배포 순서**: `environments/cicd`는 `data "azurerm_resource_group"`로 dev/prd
   리소스그룹을 조회하므로, **aiden-dev/aiden-prd가 먼저 배포되어 있어야** 합니다.
-- **자격증명 확인**: `terraform apply` 후 `terraform output client_id` /
-  `terraform output tenant_id` / `terraform output -raw client_secret`으로 값을 꺼내
-  CI/CD 플랫폼의 시크릿 저장소에 등록하세요. 시크릿은 `terraform.tfstate`에도 평문으로
-  남으므로(다른 환경과 마찬가지로 `.gitignore`에 의해 git에는 커밋되지 않음) state 파일
-  자체의 접근 권한 관리가 중요합니다.
+- **자격증명 확인 및 개발자 전달**: `terraform apply` 후 아래 값을 꺼내 개발자에게 전달하고,
+  CI/CD 플랫폼의 시크릿 저장소에도 등록하세요.
+
+  | 전달 항목 | Terraform output | 확인 명령 |
+  |---|---|---|
+  | appid | `client_id` | `terraform output client_id` |
+  | tenantid | `tenant_id` | `terraform output tenant_id` |
+  | secret | `client_secret` | `terraform output -raw client_secret` |
+
+  시크릿은 `terraform.tfstate`에도 평문으로 남으므로(다른 환경과 마찬가지로 `.gitignore`에
+  의해 git에는 커밋되지 않음) state 파일 자체의 접근 권한 관리가 중요합니다.
 - **사전 권한 요건**: Azure 구독 권한(커스텀 역할 정의를 만들 수 있는 `Owner` 또는
   `User Access Administrator`)과, **Entra ID(Azure AD)에서 앱 등록 권한**(Application
   Administrator/Cloud Application Administrator 역할, 또는 테넌트가 일반 사용자의 앱 등록을
