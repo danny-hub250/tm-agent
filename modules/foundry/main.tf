@@ -7,6 +7,17 @@ resource "azurerm_cognitive_account" "foundry" {
   sku_name              = "S0"
   custom_subdomain_name = var.name
   tags                  = var.tags
+
+  # Foundry Project(azurerm_cognitive_account_project) 생성 시 필수 - project_management_enabled를
+  # true로 두려면 계정 자체에도 관리 ID가 있어야 함.
+  project_management_enabled = var.project_name != null
+
+  dynamic "identity" {
+    for_each = var.project_name != null ? [1] : []
+    content {
+      type = "SystemAssigned"
+    }
+  }
 }
 
 resource "azurerm_cognitive_account_project" "this" {

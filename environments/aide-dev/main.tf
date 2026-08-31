@@ -133,10 +133,13 @@ module "foundry" {
       model_version = "2026-07-09"
       capacity      = 3003
     }
+    # NOTE: 2026-08-31 기준 aide-dev 구독의 EastUS2 text-embedding-3-large quota 한도가
+    # 10000이라 원래 목표(12003)를 넘어 quota 최대치인 10000으로 낮춤. 나머지 4개 모델은
+    # 원래 목표 capacity가 이 구독 quota(10000) 이내라 그대로 유지.
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
-      capacity      = 12003
+      capacity      = 10000
     }
   }
 }

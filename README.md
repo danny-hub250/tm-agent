@@ -85,14 +85,21 @@ VNet 연결)은 이번 범위에서 제외했습니다 — 추후 별도로 추�
 | gpt-5.6-luna | 2026-07-09 | 3007 | 2997 |
 | gpt-5.6-sol | 2026-07-09 | 3990 | 7993 |
 | gpt-5.6-terra | 2026-07-09 | 3003 | 6001 |
-| text-embedding-3-large | 1 | 12003 | 1964 |
+| text-embedding-3-large | 1 | 10000\* | 1964 |
 
 capacity 단위는 1,000 TPM(분당 토큰) 기준이며(예: `5004` = 5,004,000 TPM), 배포 유형은 모두 `GlobalStandard`(글로벌 표준)입니다.
+
+\* aide-dev 구독의 EastUS2 text-embedding-3-large quota 한도가 10000이라, 원래 목표(12003)를
+넘어 quota 최대치로 낮췄습니다. 나머지 4개 모델은 두 구독 모두 quota(10000) 이내라 원래
+목표값 그대로입니다.
 
 `foundry` 모듈은 `project_name`을 지정하면 Foundry 계정 하위에 **Foundry Project**
 (`azurerm_cognitive_account_project`, ARM 타입 `Microsoft.CognitiveServices/accounts/projects`)도
 함께 생성합니다. 두 환경 모두 `aide-{d,p}-msf-aideagent`라는 이름으로 프로젝트를 생성하며,
-System-Assigned Identity를 사용합니다(리소스 자체가 identity 블록을 요구함).
+System-Assigned Identity를 사용합니다. Foundry Project를 만들려면 상위 Foundry 계정
+(`azurerm_cognitive_account`) 자체도 `project_management_enabled = true`와
+System-Assigned Identity가 있어야 해서, `project_name`이 지정된 경우에만 계정에도 identity
+블록을 동적으로 추가합니다.
 
 ## 배포 대상 구독
 

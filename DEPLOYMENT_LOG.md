@@ -169,3 +169,21 @@ fmt/init/validate 통과(aide-dev, aide-prd, cicd 모두). 아직 미해결 상�
   (아직 미해결)
 
 두 문제 모두 이번 rename 작업 범위 밖이라 손대지 않음.
+
+## 2026-08-31 — 미해결 이슈 2건 수정 (Foundry Project 버그, embedding quota)
+
+지난 aiden-dev(현 aide-dev) apply에서 발견된 두 가지 문제를 모두 수정함.
+
+1. **Foundry Project 생성 버그**: `azurerm_cognitive_account`에 `project_management_enabled
+   = var.project_name != null`를 추가했더니 "a managed identity must be assigned" 에러가
+   추가로 발생 — 계정 자체에도 System-Assigned Identity가 있어야 함을 확인하고,
+   `project_name`이 지정된 경우에만 `identity { type = "SystemAssigned" }` 블록을 동적으로
+   추가하도록 `modules/foundry`를 수정함.
+2. **text-embedding-3-large quota 초과**: `aide-dev`/`aide-prd` 구독의 EastUS2 quota를
+   재조회한 결과, 두 구독 모두 5개 모델 quota 한도가 **10000**으로 확인됨(직전 mySUNI
+   구독의 1000/100과는 다름). dev의 원래 목표 capacity 중 text-embedding-3-large(12003)만
+   유일하게 10000을 초과해 10000으로 낮춤. 나머지 4개 모델(dev) + prd 5개 모델은 모두 원래
+   목표값이 10000 이내라 변경 없음.
+
+fmt/init/validate/plan 통과 — aide-dev 21개, aide-prd 21개 리소스 생성 예정(변경/삭제 없음).
+이제 재배포 시 이 두 문제로 인한 실패는 없을 것으로 예상.
