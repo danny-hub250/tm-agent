@@ -28,3 +28,5 @@ terraform.rc
 # logs
 crash.log
 crash.*.log
+apply.log
+destroy*.log

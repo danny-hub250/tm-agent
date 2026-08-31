@@ -187,3 +187,29 @@ fmt/init/validate 통과(aide-dev, aide-prd, cicd 모두). 아직 미해결 상�
 
 fmt/init/validate/plan 통과 — aide-dev 21개, aide-prd 21개 리소스 생성 예정(변경/삭제 없음).
 이제 재배포 시 이 두 문제로 인한 실패는 없을 것으로 예상.
+
+## 2026-08-31 — aide-dev 배포 성공 (21/21) + firewall_endpoints 버그 수정
+
+`aide-dev`를 구독 `aide-dev`(3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb)에 재배포 시도 → **21/21
+리소스 전부 성공** (RG/VNet/Subnet/DNS 4개+Link 4개/Foundry 계정+Foundry Project
+`aide-d-msf-aideagent`+모델 5개(전부 성공, embedding capacity 10000 포함)/Foundry PE/
+ACR(`aidedevcr`)+PE). 직전에 수정한 Foundry Project 버그, embedding quota 조정이 모두
+실제로 통했음을 확인.
+
+배포 직후 `firewall_endpoints` output이 빈 배열로 나오는 문제 발견 — `azurerm_private_endpoint`의
+`custom_dns_configs`는 `private_dns_zone_group`을 쓰는 구성(우리 프로젝트 전부 해당)에서는
+항상 비어있고, 실제 IP-FQDN 레코드는 `private_dns_zone_configs[].record_sets[]`에 생성된다는
+것을 `az network private-endpoint dns-zone-group list`로 확인. `modules/privateendpoint`의
+`dns_configs` output을 이 필드를 평탄화하는 방식으로 수정 → 재확인 결과 정상적으로 5개
+FQDN-IP 쌍 모두 출력됨(Foundry 3개, ACR 2개).
+
+**aide-dev 방화벽 신청용 정보**:
+| FQDN | IP |
+|---|---|
+| aide-d-msf.privatelink.cognitiveservices.azure.com | 10.70.254.4 |
+| aide-d-msf.privatelink.openai.azure.com | 10.70.254.5 |
+| aide-d-msf.privatelink.services.ai.azure.com | 10.70.254.6 |
+| aidedevcr.koreacentral.data.privatelink.azurecr.io | 10.70.254.7 |
+| aidedevcr.privatelink.azurecr.io | 10.70.254.8 |
+
+`aide-prd`도 이어서 apply 진행 중.

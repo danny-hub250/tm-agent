@@ -179,8 +179,10 @@ ACR의 지역별 전용 데이터 엔드포인트(`<registry>.<region>.data.azur
 사설 IP라, 미리 채울 수 없습니다. 대신 `terraform apply` 후 `terraform output -json
 firewall_endpoints`로 각 환경의 Foundry PE(3개 FQDN) + ACR PE(2개 FQDN, 로그인서버·데이터
 엔드포인트)에 실제 할당된 `{fqdn, ip_addresses}` 목록을 바로 확인할 수 있습니다
-(`modules/privateendpoint`의 `dns_configs` output, `azurerm_private_endpoint`의
-`custom_dns_configs`를 그대로 노출). 방화벽 신청 문서에는 이 값을 그대로 사용하면 됩니다.
+(`modules/privateendpoint`의 `dns_configs` output). `private_dns_zone_group`을 쓰는 구성에서는
+`azurerm_private_endpoint`의 `custom_dns_configs`가 항상 빈 목록으로 남고, 실제 레코드는
+`private_dns_zone_configs[].record_sets[]`에 생성되므로 이를 평탄화해서 노출합니다(2026-08-31
+`aide-dev` 실배포로 확인함). 방화벽 신청 문서에는 이 값을 그대로 사용하면 됩니다.
 
 ## 사용법
 
