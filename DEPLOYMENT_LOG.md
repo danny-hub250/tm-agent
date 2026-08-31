@@ -213,3 +213,28 @@ FQDN-IP 쌍 모두 출력됨(Foundry 3개, ACR 2개).
 | aidedevcr.privatelink.azurecr.io | 10.70.254.8 |
 
 `aide-prd`도 이어서 apply 진행 중.
+
+## 2026-08-31 — aide-prd 배포 성공 + environments/cicd(SP) 배포 성공 — 전체 완료
+
+`aide-prd`를 구독 `aide-prd`(dc07dd36-71ed-4355-8c70-0a753a948c63)에 배포 → **21/21 성공**
+(aide-dev와 동일 구성, embedding capacity는 원래 목표값 1964 그대로 정상 배포됨 — quota 문제
+없었음).
+
+**aide-prd 방화벽 신청용 정보**:
+| FQDN | IP |
+|---|---|
+| aide-p-msf.privatelink.cognitiveservices.azure.com | 10.70.254.36 |
+| aide-p-msf.privatelink.openai.azure.com | 10.70.254.37 |
+| aide-p-msf.privatelink.services.ai.azure.com | 10.70.254.38 |
+| aideprdcr.koreacentral.data.privatelink.azurecr.io | 10.70.254.39 |
+| aideprdcr.privatelink.azurecr.io | 10.70.254.40 |
+
+이어서 `environments/cicd` 배포 → **7/7 성공** (Entra ID App/SP `aidecr-sp`, 클라이언트 시크릿,
+커스텀 role `full-admin-acr`, dev/prd 양쪽 RG에 role assignment). `az role assignment list`로
+두 RG(`aide-ai-dev-rg`, `aide-ai-prd-rg`) 모두에 정상 할당된 것을 확인.
+
+**CI/CD SP 자격증명** (개발자 전달 완료, secret은 대화 중 1회만 노출 — 안전한 곳에 보관 요청):
+- appid: `80e3ee66-dda2-47a4-bc26-d0e02ffb1234`
+- tenantid: `06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`
+
+**결론: 2026-08-31 기준 aide-dev/aide-prd/cicd 3개 환경 전부 정상 배포 완료.**
