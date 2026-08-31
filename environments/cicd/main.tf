@@ -6,22 +6,13 @@
 #   azurerm provider를 구독별로 분리해서 사용(providers.tf의 azurerm.dev / azurerm.prd).
 # - 역할은 참고 프로젝트(skbax)의 "full-admin-acr" 커스텀 역할(ACR 관리 전반)을 그대로 재현.
 #
-# 주의: aide-dev/aide-prd 환경(리소스그룹)이 먼저 배포되어 있어야 아래 data 조회가 성공함.
+# 참고 프로젝트(skbax)와 동일하게 role assignment 스코프는 RG가 아니라 구독 단위로 부여함
+# (구독에 할당 -> 하위 모든 RG/ACR에 자동 상속).
 
 module "cicd_sp" {
   source = "../../modules/serviceprincipal"
 
   display_name = "aidecr-sp"
-}
-
-data "azurerm_resource_group" "dev" {
-  provider = azurerm.dev
-  name     = "aide-ai-dev-rg"
-}
-
-data "azurerm_resource_group" "prd" {
-  provider = azurerm.prd
-  name     = "aide-ai-prd-rg"
 }
 
 resource "azurerm_role_definition" "full_admin_acr" {
@@ -162,7 +153,7 @@ resource "azurerm_role_definition" "full_admin_acr" {
 resource "azurerm_role_assignment" "acr_admin_dev" {
   provider = azurerm.dev
 
-  scope              = data.azurerm_resource_group.dev.id
+  scope              = "/subscriptions/3c71accf-dcb0-4a1d-8c8b-8e363c06a8bb" # aide-dev 구독
   role_definition_id = azurerm_role_definition.full_admin_acr.role_definition_resource_id
   principal_id       = module.cicd_sp.object_id
 }
@@ -170,7 +161,7 @@ resource "azurerm_role_assignment" "acr_admin_dev" {
 resource "azurerm_role_assignment" "acr_admin_prd" {
   provider = azurerm.prd
 
-  scope              = data.azurerm_resource_group.prd.id
+  scope              = "/subscriptions/dc07dd36-71ed-4355-8c70-0a753a948c63" # aide-prd 구독
   role_definition_id = azurerm_role_definition.full_admin_acr.role_definition_resource_id
   principal_id       = module.cicd_sp.object_id
 }

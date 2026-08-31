@@ -238,3 +238,15 @@ FQDN-IP 쌍 모두 출력됨(Foundry 3개, ACR 2개).
 - tenantid: `06c7ea6f-b5db-4ca2-a0fe-e1d59620e937`
 
 **결론: 2026-08-31 기준 aide-dev/aide-prd/cicd 3개 환경 전부 정상 배포 완료.**
+
+## 2026-08-31 — CI/CD role assignment 범위를 RG → 구독 단위로 변경
+
+배포 후 Azure Portal에서 확인해보니 사용자가 원했던 건 참고 프로젝트(skbax)처럼 **구독
+단위**(상속됨) 할당이었는데, 실제로는 RG 단위로 붙어있었음. `environments/cicd`의
+`azurerm_role_assignment.acr_admin_dev`/`acr_admin_prd`의 `scope`를 각 리소스그룹 ID에서
+구독 ID(`/subscriptions/<id>`)로 변경 — `data "azurerm_resource_group"` 조회도 더 이상
+필요 없어져 제거함. `scope`는 role assignment의 ForceNew 속성이라 Terraform이 자동으로
+replace(삭제 후 재생성) 처리 — SP/시크릿/역할 정의는 영향 없음.
+
+재적용 후 `az role assignment list`로 두 구독(`aide-dev`, `aide-prd`) 모두 스코프가
+`/subscriptions/<id>`(구독 전체)로 정상 반영된 것을 확인.

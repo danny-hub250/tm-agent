@@ -127,18 +127,17 @@ Principal과 커스텀 Role Assignment를 `environments/cicd`에 구성했습니
   `azurerm_role_definition`(ACR 등록/삭제/자격증명/replication/webhook/task 등 113개 액션 —
   Container Registry에 대한 전권). 내장 역할 `AcrPush`보다 넓은 범위이므로 필요 이상의 권한이
   아닌지 주기적으로 재검토하는 것을 권장합니다.
-- **범위(scope)**: `aide-ai-dev-rg`/`aide-ai-prd-rg` **리소스그룹 단위**로 role
-  assignment. 역할 자체의 `assignable_scopes`는 `aide-dev`/`aide-prd` 두 구독 모두를
-  포함하도록 만들어(참고 프로젝트와 동일한 패턴) 하나의 역할 정의를 양쪽에서 재사용합니다.
+- **범위(scope)**: `aide-dev`/`aide-prd` **구독 단위**로 role assignment(참고
+  프로젝트 skbax와 동일한 패턴 — 구독에 할당하면 그 하위 모든 RG/ACR에 자동 상속됨). 역할
+  자체의 `assignable_scopes`도 이 두 구독을 포함하도록 만들어 하나의 역할 정의를 양쪽에서
+  재사용합니다.
 - **구독 분리 대응**: dev/prd가 서로 다른 구독이라, `providers.tf`에 `azurerm.dev`/
-  `azurerm.prd` 두 개의 provider alias를 두고 각 리소스그룹 조회·role assignment에
-  명시적으로 지정합니다. SP(앱 등록) 자체는 테넌트 단위 리소스라 별칭 없는 단일 `azuread`
-  provider로 한 번만 생성합니다.
+  `azurerm.prd` 두 개의 provider alias를 두고 각 구독의 role assignment에 명시적으로
+  지정합니다. SP(앱 등록) 자체는 테넌트 단위 리소스라 별칭 없는 단일 `azuread` provider로
+  한 번만 생성합니다.
 - **시크릿 로테이션**: 기본 365일 유효(`secret_validity_days` 변수)이며, `time_rotating`
   리소스로 관리되어 유효기간이 지나야만 다음 apply 때 새 시크릿으로 교체됩니다(매 apply마다
   바뀌지 않음).
-- **배포 순서**: `environments/cicd`는 `data "azurerm_resource_group"`로 dev/prd
-  리소스그룹을 조회하므로, **aide-dev/aide-prd가 먼저 배포되어 있어야** 합니다.
 - **자격증명 확인 및 개발자 전달**: `terraform apply` 후 아래 값을 꺼내 개발자에게 전달하고,
   CI/CD 플랫폼의 시크릿 저장소에도 등록하세요.
 
