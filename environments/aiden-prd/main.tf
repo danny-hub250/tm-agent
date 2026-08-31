@@ -112,37 +112,31 @@ module "foundry" {
   tags                = var.tags
   project_name        = "aiden-p-msf-aidenagent"
 
-  # NOTE: 2026-08-27 기준 mySUNI AI Portal - LJK 구독의 EastUS2 OpenAI GlobalStandard
-  # quota가 aiden-dev 배포로 모델당 1000/1000(잔여 0)까지 이미 소진된 상태라, 원래 목표
-  # capacity를 훨씬 못 미치는 100으로 임시로 낮춰 배포함(그래도 quota 초과로 실패할 수 있음).
-  # Azure에 quota 증설 요청 후 승인되면 아래 원래 값으로 복원할 것.
-  # (원래 목표: gpt-5.5=5997, gpt-5.6-luna=2997, gpt-5.6-sol=7993, gpt-5.6-terra=6001,
-  #  text-embedding-3-large=1964)
   model_deployments = {
     "gpt-5.5" = {
       model_name    = "gpt-5.5"
       model_version = "2026-04-24"
-      capacity      = 100
+      capacity      = 5997
     }
     "gpt-5.6-luna" = {
       model_name    = "gpt-5.6-luna"
       model_version = "2026-07-09"
-      capacity      = 100
+      capacity      = 2997
     }
     "gpt-5.6-sol" = {
       model_name    = "gpt-5.6-sol"
       model_version = "2026-07-09"
-      capacity      = 100
+      capacity      = 7993
     }
     "gpt-5.6-terra" = {
       model_name    = "gpt-5.6-terra"
       model_version = "2026-07-09"
-      capacity      = 100
+      capacity      = 6001
     }
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
-      capacity      = 100
+      capacity      = 1964
     }
   }
 }
