@@ -250,3 +250,20 @@ replace(삭제 후 재생성) 처리 — SP/시크릿/역할 정의는 영향 �
 
 재적용 후 `az role assignment list`로 두 구독(`aide-dev`, `aide-prd`) 모두 스코프가
 `/subscriptions/<id>`(구독 전체)로 정상 반영된 것을 확인.
+
+## 2026-09-02 — Foundry 방화벽(network_acls) IaC drift 수정
+
+배포 후 Azure Portal에서 수동으로 aide-d-msf/aide-p-msf의 네트워킹 설정을 "선택한 네트워크"로
+바꾸고 회사 NAT IP(`211.45.60.0/29`)만 허용하도록 방화벽을 강화했는데, 이 설정이 Terraform
+코드에는 없어서 `terraform plan`을 돌려보니 다음 apply 시 이 방화벽이 삭제되고 다시 전체
+네트워크에 열리는 drift가 확인됨(`az cognitiveservices account show`로 실제 설정
+`defaultAction=Deny, bypass=AzureServices, ipRules=[211.45.60.0/29]` 확인).
+
+`modules/foundry`에 `firewall_allowed_ip_rules` 변수를 추가하고, 값이 있을 때만
+`network_acls` 블록을 동적으로 생성하도록 수정. `aide-dev`/`aide-prd` 양쪽에
+`firewall_allowed_ip_rules = ["211.45.60.0/29"]`를 설정.
+
+재검증 결과 aide-dev는 `terraform plan` "No changes", aide-prd는 무관한 사전 존재 drift
+(각 모델 배포의 `rai_policy_name = "Microsoft.DefaultV2" -> null`, 5건) 외에는 network_acls
+관련 diff 없음 — 방화벽 drift는 완전히 해소됨. `rai_policy_name` drift는 이번 작업 범위 밖이라
+별도 처리하지 않음.

@@ -18,6 +18,18 @@ resource "azurerm_cognitive_account" "foundry" {
       type = "SystemAssigned"
     }
   }
+
+  # 방화벽: 지정된 IP만 허용하고 나머지는 차단(Private Endpoint 경유 트래픽 및 Azure
+  # 신뢰할 수 있는 서비스는 별도로 허용됨). firewall_allowed_ip_rules가 비어있으면
+  # network_acls 자체를 설정하지 않음(기본값 = 전체 허용).
+  dynamic "network_acls" {
+    for_each = length(var.firewall_allowed_ip_rules) > 0 ? [1] : []
+    content {
+      default_action = "Deny"
+      bypass         = "AzureServices"
+      ip_rules       = var.firewall_allowed_ip_rules
+    }
+  }
 }
 
 resource "azurerm_cognitive_account_project" "this" {

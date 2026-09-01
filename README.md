@@ -101,6 +101,19 @@ System-Assigned Identity를 사용합니다. Foundry Project를 만들려면 상
 System-Assigned Identity가 있어야 해서, `project_name`이 지정된 경우에만 계정에도 identity
 블록을 동적으로 추가합니다.
 
+### Foundry 방화벽 (network_acls)
+
+`foundry` 모듈은 `firewall_allowed_ip_rules`(공인 IP CIDR 목록)를 지정하면 Cognitive
+Account에 `network_acls`(`default_action = "Deny"`, `bypass = "AzureServices"`)를 설정해
+지정된 IP만 퍼블릭 접근을 허용하고 나머지는 차단합니다. 비어있으면(기본값) `network_acls`
+자체를 설정하지 않습니다(= 전체 네트워크 허용).
+
+두 환경 모두 `firewall_allowed_ip_rules = ["211.45.60.0/29"]`(회사 NAT IP)로 설정되어
+있습니다 — VNet 안에 있지 않은 사무실 클라이언트(Azure AI Foundry 포털 등)가 Foundry 계정의
+퍼블릭 엔드포인트에 접근할 수 있게 하기 위한 예외이며, 이 값은 원래 배포 후 Azure Portal에서
+수동으로 추가됐던 것을 코드로 반영한 것입니다(2026-09-02, 반영 전에는 `terraform apply` 시
+이 방화벽 설정이 삭제되는 IaC drift가 있었음).
+
 ## 배포 대상 구독
 
 `aide-dev`/`aide-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/

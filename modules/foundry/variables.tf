@@ -8,6 +8,12 @@ variable "project_name" {
   default     = null
 }
 
+variable "firewall_allowed_ip_rules" {
+  description = "Cognitive Account 방화벽(network_acls)에서 허용할 공인 IP CIDR 목록. 비어있으면 network_acls를 설정하지 않음(기본값 = 전체 네트워크 허용)"
+  type        = list(string)
+  default     = []
+}
+
 
 variable "tags" {
   type    = map(string)

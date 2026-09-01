@@ -112,6 +112,9 @@ module "foundry" {
   tags                = var.tags
   project_name        = "aide-p-msf-aideagent"
 
+  # 회사 NAT IP만 허용 (포털에서 수동 적용된 설정을 코드로 반영, 2026-09-02)
+  firewall_allowed_ip_rules = ["211.45.60.0/29"]
+
   model_deployments = {
     "gpt-5.5" = {
       model_name    = "gpt-5.5"
