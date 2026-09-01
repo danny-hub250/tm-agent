@@ -267,3 +267,16 @@ replace(삭제 후 재생성) 처리 — SP/시크릿/역할 정의는 영향 �
 (각 모델 배포의 `rai_policy_name = "Microsoft.DefaultV2" -> null`, 5건) 외에는 network_acls
 관련 diff 없음 — 방화벽 drift는 완전히 해소됨. `rai_policy_name` drift는 이번 작업 범위 밖이라
 별도 처리하지 않음.
+
+## 2026-09-02 — Container Registry 방화벽(network_rule_set)도 코드로 반영
+
+Foundry에 이어 aidedevcr/aideprdcr에도 동일하게 포털에서 수동으로 방화벽이 설정되어 있음을
+확인 (`az acr show`로 `networkRuleSet.defaultAction=Deny, ipRules=[211.45.60.0/29],
+networkRuleBypassOptions=AzureServices` 확인). `modules/containerregistry`에
+`firewall_allowed_ip_rules` 변수를 추가하고 `network_rule_set`/`network_rule_bypass_option`을
+조건부로 설정하도록 수정, 양 환경에 `["211.45.60.0/29"]` 적용.
+
+참고로 ACR의 `network_rule_set`은 Terraform 스키마상 Optional+Computed라 (Foundry의
+`network_acls`와 달리) 코드에 없어도 apply 시 삭제되는 drift는 아니었음 — 그래도 Foundry와의
+일관성 및 명시적 관리를 위해 코드화함. 재검증 결과 aide-dev "No changes", aide-prd는 무관한
+기존 drift(rai_policy_name, 5건)만 남고 ACR 관련 diff 없음.

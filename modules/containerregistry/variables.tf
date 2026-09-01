@@ -23,3 +23,9 @@ variable "data_endpoint_enabled" {
   type        = bool
   default     = true
 }
+
+variable "firewall_allowed_ip_rules" {
+  description = "ACR 방화벽(network_rule_set)에서 허용할 공인 IP CIDR 목록. 비어있으면 방화벽을 설정하지 않음(기본값 = 전체 네트워크 허용)"
+  type        = list(string)
+  default     = []
+}

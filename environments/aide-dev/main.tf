@@ -205,6 +205,9 @@ module "acr" {
   resource_group_name = module.ai-rg.name
   sku                 = "Premium"
   tags                = var.tags
+
+  # 회사 NAT IP만 허용 (포털에서 수동 적용된 설정을 코드로 반영, 2026-09-02)
+  firewall_allowed_ip_rules = ["211.45.60.0/29"]
 }
 
 module "acr_pe" {

@@ -114,6 +114,17 @@ Account에 `network_acls`(`default_action = "Deny"`, `bypass = "AzureServices"`)
 수동으로 추가됐던 것을 코드로 반영한 것입니다(2026-09-02, 반영 전에는 `terraform apply` 시
 이 방화벽 설정이 삭제되는 IaC drift가 있었음).
 
+### Container Registry 방화벽 (network_rule_set)
+
+`containerregistry` 모듈도 동일한 패턴으로 `firewall_allowed_ip_rules`를 지원합니다
+(`network_rule_set`에 `default_action = "Deny"` + 허용 IP, `network_rule_bypass_option =
+"AzureServices"`). 두 환경 모두 Foundry와 동일하게 `["211.45.60.0/29"]`(회사 NAT IP)로
+설정되어 있습니다 — 이 값도 Foundry와 마찬가지로 배포 후 Azure Portal에서 수동으로
+추가됐던 설정을 코드로 반영한 것입니다(2026-09-02). 다만 ACR의 `network_rule_set`은
+Terraform 스키마상 Optional+Computed라 코드에 없어도 `terraform apply`가 이 설정을
+삭제하는 drift는 없었습니다 — 그래도 Foundry와의 일관성 및 명시적 관리를 위해 코드로
+반영했습니다.
+
 ## 배포 대상 구독
 
 `aide-dev`/`aide-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/
