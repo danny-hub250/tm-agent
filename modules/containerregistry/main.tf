@@ -21,3 +21,23 @@ resource "azurerm_container_registry" "acr" {
 
   tags = var.tags
 }
+
+# 리포지토리 권한 토큰 - AAD 없이 리포지토리 범위로 push/pull하는 용도 (예: 외부 CI/CD, 서드파티 툴).
+# token_name이 지정된 경우에만 생성하며, 내장 scope map "_repositories_admin"(모든 리포지토리
+# 대상 admin 권한)을 그대로 사용함.
+resource "azurerm_container_registry_token" "this" {
+  count = var.token_name != null ? 1 : 0
+
+  name                    = var.token_name
+  container_registry_name = azurerm_container_registry.acr.name
+  resource_group_name     = var.resource_group_name
+  scope_map_id            = "${azurerm_container_registry.acr.id}/scopeMaps/_repositories_admin"
+}
+
+resource "azurerm_container_registry_token_password" "this" {
+  count = var.token_name != null ? 1 : 0
+
+  container_registry_token_id = azurerm_container_registry_token.this[0].id
+
+  password1 {} # expiry 미지정 = 만료 없음
+}

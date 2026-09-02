@@ -27,3 +27,13 @@ output "firewall_endpoints" {
     module.acr_pe.dns_configs,
   )
 }
+
+output "acr_token_name" {
+  value = module.acr.token_name
+}
+
+output "acr_token_password" {
+  description = "ACR 리포지토리 권한 토큰의 password1 - 배포 후 개발자/CI·CD에 전달 필요"
+  value       = module.acr.token_password
+  sensitive   = true
+}

@@ -125,6 +125,23 @@ Terraform 스키마상 Optional+Computed라 코드에 없어도 `terraform apply
 삭제하는 drift는 없었습니다 — 그래도 Foundry와의 일관성 및 명시적 관리를 위해 코드로
 반영했습니다.
 
+### Container Registry 리포지토리 권한 토큰 (`token_name`)
+
+`containerregistry` 모듈은 `token_name`을 지정하면 AAD 없이 리포지토리 범위로 push/pull할 수
+있는 **리포지토리 권한 토큰**(`azurerm_container_registry_token` +
+`azurerm_container_registry_token_password`)을 생성합니다. 내장 scope map
+`_repositories_admin`(모든 리포지토리 대상 admin 권한)을 그대로 사용하며, 두 환경 모두
+`aidedevcruser`/`aideprdcruser`라는 이름으로 되어 있습니다 — 이 역시 배포 후 Azure Portal에서
+수동으로 추가됐던 설정을 코드로 반영한 것입니다(2026-09-02).
+
+- **암호 확인**: `terraform apply` 후 `terraform output acr_token_name` /
+  `terraform output -raw acr_token_password`로 값을 꺼내 개발자/CI·CD에 전달하세요.
+- **주의**: `azurerm_container_registry_token_password`는 apply할 때마다 ACR의
+  `GenerateCredentials` API를 호출해 **암호를 새로 발급**합니다. 이미 만들어져 있던
+  `aidedevcruser`/`aideprdcruser` 토큰에 이 코드를 처음 적용(apply)하면, 포털에서 수동으로
+  발급했던 기존 암호는 새 값으로 교체되어 무효화됩니다 — 이 암호를 이미 사용 중인 곳이
+  있다면 재배포 시점에 새 암호로 갱신해야 합니다.
+
 ## 배포 대상 구독
 
 `aide-dev`/`aide-prd`는 **서로 다른 구독**에 배포됩니다 (`providers.tf`에 `subscription_id`/

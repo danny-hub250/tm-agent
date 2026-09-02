@@ -280,3 +280,18 @@ networkRuleBypassOptions=AzureServices` 확인). `modules/containerregistry`에
 `network_acls`와 달리) 코드에 없어도 apply 시 삭제되는 drift는 아니었음 — 그래도 Foundry와의
 일관성 및 명시적 관리를 위해 코드화함. 재검증 결과 aide-dev "No changes", aide-prd는 무관한
 기존 drift(rai_policy_name, 5건)만 남고 ACR 관련 diff 없음.
+
+## 2026-09-02 — ACR 리포지토리 권한 토큰(token) 코드화 (아직 apply 안 함)
+
+aidedevcr/aideprdcr에 포털에서 수동으로 만들어둔 리포지토리 권한 토큰(`aidedevcruser`/
+`aideprdcruser`, scope map `_repositories_admin`, 암호 만료 없음)을 확인
+(`az acr token show`). `modules/containerregistry`에 `token_name` 변수와
+`azurerm_container_registry_token`/`azurerm_container_registry_token_password` 리소스를
+추가하고, `token_name`/`token_password` output을 노출. 양 환경에
+`token_name = "aidedevcruser"`/`"aideprdcruser"` 적용.
+
+fmt/init/validate/plan 통과 (dev: token 관련 2개 add, prd: 2개 add + 무관한 기존
+rai_policy_name drift 5건). **아직 terraform apply는 하지 않음** —
+`azurerm_container_registry_token_password`는 apply 시마다 ACR
+GenerateCredentials API로 암호를 새로 발급하므로, 처음 apply하면 포털에서 수동 발급했던
+기존 암호가 무효화됨을 사용자에게 안내 후 적용 여부 확인 필요.

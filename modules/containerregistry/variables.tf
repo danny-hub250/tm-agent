@@ -29,3 +29,9 @@ variable "firewall_allowed_ip_rules" {
   type        = list(string)
   default     = []
 }
+
+variable "token_name" {
+  description = "리포지토리 권한 토큰(azurerm_container_registry_token) 이름. null이면 생성하지 않음"
+  type        = string
+  default     = null
+}
